@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#06141e"><link rel="manifest" href="manifest.json">
+<title>Cerveja na Rede</title>
+<style>
+:root{
+  --bg:#06141e;--panel:#0b1c27;--panel2:#102735;--gold:#ffc400;--gold2:#ffda45;
+  --white:#f7f8fa;--muted:#a9b4bb;--line:#27404d;--blue:#0b8ee8;--red:#ef3038;
+  --shadow:0 10px 28px #0008;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--white);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+body{background:radial-gradient(circle at 50% -20%,#173747 0,#06141e 48%,#041019 100%);padding-bottom:74px}
+button,input,select{font:inherit}
+header{height:66px;background:#06131d;border-bottom:1px solid #1f3642;display:flex;align-items:center;position:sticky;top:0;z-index:30}
+.head{width:min(480px,100%);margin:auto;padding:0 14px;display:flex;align-items:center;gap:10px}
+.brandmark{width:42px;height:42px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:#06141e;border:2px solid var(--gold);flex:none}
+.brandmark img{width:72px;height:72px;object-fit:cover}
+.brand h1{margin:0;color:var(--gold);font-size:18px;font-weight:950;text-transform:uppercase;letter-spacing:.3px}
+.brand p{margin:2px 0 0;color:#dce4e8;font-size:10px}
+main{width:min(480px,100%);margin:auto;padding:10px 10px 24px}
+.nav{display:none}
+.screen.hidden{display:none}
+.card{background:linear-gradient(180deg,#0d222e,#0a1b25);border:1px solid #25414e;border-radius:16px;padding:13px;margin-bottom:10px;box-shadow:var(--shadow)}
+.hero{border-color:#31515e}
+.hero h2{font-size:18px;margin:0 0 4px;color:var(--white)}
+.hero p{margin:0;color:var(--muted);font-size:12px}
+.section-title{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:9px}
+.section-title h2{margin:0;font-size:16px}
+.muted{color:var(--muted);font-size:11px}
+.grid,.grid3{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+label{font-size:11px;font-weight:800;color:#d9e2e6;display:block;margin-bottom:5px}
+input,select{width:100%;border:1px solid #2a4654;border-radius:9px;padding:9px;background:#081721;color:#fff;outline:none}
+.btn{border:0;border-radius:11px;padding:10px 13px;font-weight:900;cursor:pointer}
+.primary{background:linear-gradient(#ffd43b,#f5b900);color:#10161a}
+.dark{background:#08151e;color:#fff;border:1px solid #34505d}
+.ghost{background:#122b38;color:#f3f7f8;border:1px solid #31505e}
+.danger{background:#5a2025;color:#ffd9dc}.full{width:100%}.big{font-size:15px;padding:13px}
+.goldline{border:1px solid var(--gold);box-shadow:0 0 0 1px #000 inset}
+.logo-card{text-align:center;padding:10px 10px 12px;background:linear-gradient(180deg,#081722,#07131b);border-color:#1d3642}
+.logo-card img{width:175px;max-width:70%;display:block;margin:0 auto}
+.tagline{color:#fff;font-size:13px;font-weight:800;margin-top:-4px}
+.home-menu{display:grid;gap:7px;margin-top:8px}
+.home-menu button{height:43px;border:2px solid var(--gold);border-radius:12px;background:#081722;color:#fff;font-weight:900;text-align:left;padding:0 15px;font-size:13px}
+.home-menu button span{color:var(--gold);margin-right:10px;font-size:17px}
+.featurebar{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:9px}
+.feature{border-top:1px solid #304954;padding:8px 3px;text-align:center;color:#cbd4d8;font-size:9px}
+.feature b{display:block;color:var(--gold);font-size:18px;margin-bottom:2px}
+.playerrow{position:relative;padding:8px 10px;margin-bottom:7px;background:#0b1d28;border-color:#203a47}
+.player{display:flex;align-items:center;gap:9px;padding-right:72px}
+.avatar{width:42px;height:42px;border-radius:50%;background:#29404b;border:1px solid #4a6672;display:grid;place-items:center;font-weight:900;font-size:16px;object-fit:cover;flex:none}
+.pname{font-size:13px;font-weight:900}.stars{color:var(--gold);letter-spacing:0;font-size:10px}
+.x{position:absolute;right:8px;top:8px;border:0;background:transparent;color:#85959d;font-size:18px}
+.player-actions{position:absolute;right:8px;bottom:8px;display:flex;gap:4px}
+.player-actions button{border:1px solid #31515e;border-radius:7px;padding:4px 6px;background:#102b38;color:#fff;font-size:9px;font-weight:900}
+.check{display:flex;align-items:center;gap:8px;padding:8px;border-bottom:1px solid #1e3641;font-size:11px}
+.check input{width:auto;accent-color:var(--gold)}
+.team{border:1px solid #2d4855;border-radius:13px;padding:9px;background:#0a1d29}
+.team h3{margin:0 0 2px;font-size:13px}.strength{font-weight:900;color:var(--gold);font-size:10px}
+.team ul{list-style:none;margin:7px 0 0;padding:0}.team li{display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid #203a45;font-size:10px}
+.team .p{font-weight:800}.team .btn{font-size:10px;padding:8px}
+.draw-title{display:flex;align-items:center;gap:8px}.draw-title .back{color:#fff;font-size:20px}
+.segment{display:flex;gap:4px;background:#07141d;padding:4px;border-radius:9px}.segment button{flex:1;border:0;background:#142c38;color:#d9e2e6;border-radius:7px;padding:8px;font-weight:900;font-size:11px}.segment button.active{background:var(--gold);color:#111}
+.scoreboard{display:grid;grid-template-columns:1fr 28px 1fr;gap:6px;align-items:center;text-align:center}
+.scorebox{background:linear-gradient(180deg,#087dc7,#07598f);border-radius:12px;padding:10px;border:1px solid #42b5ff}
+.scorebox.red{background:linear-gradient(180deg,#ef3a42,#9e1f2b);border-color:#ff6870}
+.scorebox>div:first-child{font-weight:900;font-size:11px}.score{font-size:46px;font-weight:950;line-height:1.05;margin:6px 0}.vs{font-weight:950;color:#dce4e7;font-size:10px}
+.scorebuttons{display:flex;justify-content:center;gap:5px}.scorebuttons button{border:0;border-radius:8px;padding:7px 10px;font-weight:950;background:#071822;color:#fff}
+.setlist{display:flex;gap:6px;overflow:auto}.set{min-width:92px;background:#0d2733;border:1px solid #294653;border-radius:9px;padding:8px;text-align:center;font-size:10px}
+.winner{outline:2px solid var(--gold)}
+.table{width:100%;border-collapse:collapse}.table th,.table td{text-align:left;padding:8px;border-bottom:1px solid #203943;font-size:10px}
+.bottomnav{position:fixed;bottom:0;left:0;right:0;height:68px;background:#07131c;border-top:1px solid #29404b;z-index:80;display:grid;grid-template-columns:repeat(5,1fr)}
+.bottomnav button{border:0;background:transparent;color:#82939c;font-size:9px;font-weight:800}.bottomnav button b{display:block;font-size:17px;margin-bottom:2px}.bottomnav button.active{color:var(--gold)}
+.editor-overlay{position:fixed;inset:0;background:#000b;display:none;align-items:flex-end;justify-content:center;padding:0;z-index:200}
+.editor-overlay.show{display:flex}
+.editor{width:min(480px,100%);background:#0b202c;border:1px solid #36535f;border-radius:20px 20px 0 0;padding:16px;box-shadow:0 -10px 40px #000b}
+.editor h3{margin:0 0 14px}.editor-actions{display:flex;gap:8px;margin-top:14px}.editphoto{display:flex;align-items:center;gap:10px;margin:10px 0}
+body.fullscreen-score{background:#041019}
+body.fullscreen-score header,body.fullscreen-score #home,body.fullscreen-score #players,body.fullscreen-score #history,body.fullscreen-score .bottomnav{display:none!important}
+body.fullscreen-score main{max-width:none;width:100%;padding:0}
+#score.fullscreen-mode{position:fixed;inset:0;z-index:100;background:linear-gradient(145deg,#041019,#0a1b26);padding:10px;overflow:auto}
+#score.fullscreen-mode .hero{display:none}
+#score.fullscreen-mode .card{max-width:900px;margin:0 auto 10px}
+#score.fullscreen-mode .scorebox{min-height:55vh;display:flex;flex-direction:column;justify-content:center}
+#score.fullscreen-mode .score{font-size:clamp(80px,18vw,220px)}
+@media(min-width:700px){main{width:480px}}
+@media(max-width:380px){.logo-card img{width:150px}.grid{grid-template-columns:1fr}.score{font-size:40px}}
+
+.toast{position:fixed;bottom:78px;left:50%;transform:translateX(-50%);background:#000e;color:#fff;padding:10px 14px;border-radius:999px;display:none;z-index:250;font-size:12px}
+</style>
+</head>
+<body>
+
+<header><div class="head">
+  <div class="brandmark"><img src="logo.png" alt=""></div>
+  <div class="brand"><h1>CERVEJA NA REDE</h1><p>Mais que um jogo, é uma boa resenha!</p></div>
+</div></header>
+
+<div id="editorOverlay" class="editor-overlay"><div class="editor">
+  <h3>✏️ Editar jogador</h3>
+  <input type="hidden" id="editId">
+  <div class="grid"><div><label>Nome / apelido</label><input id="editName"></div><div><label>Estrelas</label><select id="editRating"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div></div>
+  <div class="editphoto"><div id="editAvatar"></div><div style="flex:1"><label>Alterar foto</label><input id="editPhoto" type="file" accept="image/*"></div></div>
+  <div class="editor-actions"><button class="btn primary" onclick="savePlayerEdit()">Salvar alterações</button><button class="btn ghost" onclick="closeEditor()">Cancelar</button></div>
+</div></div>
+
+<main>
+<section id="home" class="screen">
+  <div class="card logo-card">
+    <img src="logo.png" alt="Cerveja na Rede">
+    <div class="tagline">Jogue, divirta-se, e que vença o melhor time!</div>
+  </div>
+  <div class="card">
+    <div class="home-menu">
+      <button onclick="show('players')"><span>👥</span>Jogadores</button>
+      <button onclick="document.getElementById('presence').scrollIntoView({behavior:'smooth'})"><span>👥</span>Participantes</button>
+      <button onclick="draw()"><span>⚽</span>Sorteio de Times</button>
+      <button onclick="show('score')"><span>▣</span>Placar</button>
+      <button onclick="show('history')"><span>◷</span>Histórico</button>
+      <button onclick="show('players')"><span>⚙</span>Configurações</button>
+    </div>
+    <div class="featurebar"><div class="feature"><b>☆</b>Classificação<br>1 a 5 estrelas</div><div class="feature"><b>♙</b>Sorteio<br>equilibrado</div><div class="feature"><b>📱</b>100% gratuito</div></div>
+  </div>
+  <div class="card"><div class="section-title"><h2>Participantes <span id="pc" class="muted">0</span></h2><button class="btn ghost" onclick="show('players')">Gerenciar</button></div><div id="presence"></div></div>
+  <div class="card">
+    <div class="section-title"><h2>🎲 Sorteio de Times</h2></div>
+    <div class="grid"><div><label>Quantidade de times</label><select id="nTeams"><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option></select></div><div><label>Jogadores por time</label><select id="nPer"><option value="0" selected>Automático</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>15</option><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option></select></div></div>
+    <div style="margin-top:9px"><button class="btn primary big full" onclick="draw()">Sortear Times</button></div>
+  </div>
+  <div id="teams" class="grid"></div>
+</section>
+
+<section id="players" class="screen hidden">
+  <div class="card">
+    <div class="section-title"><h2>👥 Jogadores</h2><button class="btn primary" onclick="document.getElementById('name').focus()">＋ Adicionar</button></div>
+    <div id="plist"></div>
+  </div>
+  <div class="card">
+    <div class="section-title"><h2>Novo jogador</h2><span class="muted">1 a 5 estrelas</span></div>
+    <div class="grid"><div><label>Nome / apelido</label><input id="name" placeholder="Ex.: João"></div><div><label>Estrelas</label><select id="rating"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option></select></div><div><label>Posição</label><select id="pos"><option>Coringa</option><option>Levantador</option><option>Ponteiro</option><option>Oposto</option><option>Central</option><option>Líbero</option></select></div><div><label>Foto</label><input id="photo" type="file" accept="image/*"></div></div>
+    <div style="margin-top:9px"><button class="btn primary full" onclick="addPlayer()">Adicionar jogador</button></div>
+    <button class="btn danger full" style="margin-top:7px" onclick="clearPlayers()">Apagar todos</button>
+  </div>
+</section>
+
+<section id="score" class="screen hidden">
+  <div class="card hero"><div class="section-title"><div><h2>🏆 Placar</h2><p>Controle pontos e sets durante a partida.</p></div><button class="btn primary" onclick="toggleScoreFullscreen()">⛶ Tela inteira</button></div></div>
+  <div class="card"><div class="scoreboard">
+    <div class="scorebox"><div>TIME A</div><div class="score" id="aScore">0</div><div class="scorebuttons"><button onclick="point('a',-1)">−1</button><button onclick="point('a',1)">+1</button></div></div>
+    <div class="vs">×</div>
+    <div class="scorebox red"><div>TIME B</div><div class="score" id="bScore">0</div><div class="scorebuttons"><button onclick="point('b',-1)">−1</button><button onclick="point('b',1)">+1</button></div></div>
+  </div><div style="margin-top:9px"><button class="btn primary full" onclick="finishSet()">Finalizar Set</button></div></div>
+  <div class="card"><div class="section-title"><h2>Sets</h2><div style="display:flex;gap:5px"><button class="btn ghost" onclick="toggleScoreFullscreen()">⛶ Tela inteira</button><button class="btn ghost" onclick="newGame()">Novo jogo</button></div></div><div id="sets" class="setlist"><div class="muted">Nenhum set finalizado.</div></div></div>
+</section>
+
+<section id="history" class="screen hidden">
+  <div class="card"><div class="section-title"><h2>📊 Histórico</h2><button class="btn danger" onclick="localStorage.removeItem('cnr_hist');renderHistory()">Limpar</button></div><div id="hist"></div></div>
+</section>
+</main>
+
+<nav class="bottomnav">
+  <button data-s="home" class="active"><b>⌂</b>Início</button>
+  <button data-s="players"><b>♙</b>Jogadores</button>
+  <button data-s="home"><b>⚽</b>Sorteio</button>
+  <button data-s="score"><b>▣</b>Placar</button>
+  <button data-s="history"><b>⋮</b>Mais</button>
+</nav>
+<div id="toast" class="toast"></div>
+
+<script>
+
+const PKEY='cnr_players_final', HKEY='cnr_hist';let players=JSON.parse(localStorage.getItem(PKEY)||'[]'), selectedPhoto='', present={};let A=0,B=0,sets=[];
+function save(){localStorage.setItem(PKEY,JSON.stringify(players))}
+function stars(n){return '⭐'.repeat(n)+'☆'.repeat(5-n)}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.s===id));if(id==='players')renderPlayers();if(id==='history')renderHistory();if(id==='home')renderPresence()}
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>show(b.dataset.s));
+function addPlayer(){let n=document.getElementById('name').value.trim();if(!n){toast('Digite o nome do jogador');return}players.push({id:Date.now()+Math.random(),name:n,rating:+rating.value,pos:pos.value,photo:selectedPhoto,present:true});save();name.value='';photo.value='';selectedPhoto='';renderPlayers();renderPresence();toast('Jogador adicionado!')}
+photo.onchange=e=>{let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>selectedPhoto=r.result;r.readAsDataURL(f)}
+function removePlayer(i){players.splice(i,1);save();renderPlayers();renderPresence()}
+function clearPlayers(){if(confirm('Apagar todos os jogadores?')){players=[];save();renderPlayers();renderPresence()}}
+function seed(){players=[['Reinaldo',4,'Ponteiro'],['Carlos',5,'Levantador'],['João',3,'Central'],['Marcos',4,'Oposto'],['André',2,'Ponteiro'],['Rafael',5,'Líbero'],['Felipe',3,'Ponteiro'],['Bruno',3,'Coringa'],['Paulo',2,'Central'],['Diego',4,'Oposto'],['Caio',2,'Ponteiro'],['Lucas',3,'Coringa']].map((x,i)=>({id:i,name:x[0],rating:x[1],pos:x[2],photo:'',present:true}));save();renderPlayers();renderPresence();toast('Exemplos adicionados')}
+function renderPlayers(){plist.innerHTML=players.length?players.map((p,i)=>`<div class="card playerrow"><button class="x" onclick="removePlayer(${i})">×</button><div class="player">${p.photo?`<img class="avatar" src="${p.photo}">`:`<div class="avatar">${esc((p.name||'?')[0])}</div>`}<div><div class="pname">${esc(p.name)}</div><div class="stars">${stars(p.rating)}</div><div class="muted">${esc(p.pos)}</div></div><div class="player-actions"><button class="ghost" onclick="editPlayer(${i})">✏️ Editar</button></div></div></div>`).join(''):'<div class="muted">Cadastre os jogadores do grupo.</div>'}
+function renderPresence(){pc.textContent=players.filter(p=>p.present!==false).length;presence.innerHTML=players.length?players.map(p=>`<label class="check"><input type="checkbox" ${p.present!==false?'checked':''} onchange="togglePresent('${p.id}')"><span><b>${esc(p.name)}</b> <span class="stars">${stars(p.rating)}</span> <span class="muted">${esc(p.pos)}</span></span></label>`).join(''):'<div class="muted">Nenhum jogador cadastrado.</div>'}
+function togglePresent(id){let p=players.find(x=>String(x.id)===String(id));p.present=!p.present;save();renderPresence()}
+function draw(){let ps=players.filter(p=>p.present!==false);let n=+nTeams.value;if(ps.length<n){toast('Não há participantes suficientes');return}let per=+nPer.value;if(per&&ps.length<n*per){toast('Não há jogadores suficientes para essa configuração');return}ps=[...ps].sort((a,b)=>b.rating-a.rating);let t=Array.from({length:n},()=>[]);let main=per?ps.slice(0,n*per):ps;let extras=per?ps.slice(n*per):[];main.forEach((p,i)=>t[i%n].push(p));let html=t.map((team,i)=>{let total=team.reduce((s,p)=>s+p.rating,0);return `<div class="team"><h3>TIME ${String.fromCharCode(65+i)} ${i%2?'🍻':'🍺'}</h3><div class="strength">Força: ${total} ⭐</div><ul>${team.map(p=>`<li><span class="p">${esc(p.name)}</span><span class="stars">${stars(p.rating)}</span></li>`).join('')}</ul><button class="btn dark full" style="margin-top:10px" onclick="show('score')">🏆 Iniciar jogo</button></div>`}).join('');if(extras.length){let total=extras.reduce((s,p)=>s+p.rating,0);html+=`<div class="team" style="border:2px dashed #f2b84b"><h3>FORA DO SORTEIO 👥</h3><div class="strength">${extras.length} jogador${extras.length===1?'':'es'} • Força: ${total} ⭐</div><ul>${extras.map(p=>`<li><span class="p">${esc(p.name)}</span><span class="stars">${stars(p.rating)}</span></li>`).join('')}</ul></div>`}teams.innerHTML=html;toast(extras.length?'Times sorteados! Jogadores restantes ficaram de fora.':'Times sorteados!')}
+
+let editingIndex=-1, editingPhoto='';
+function editPlayer(i){
+  const p=players[i]; if(!p)return;
+  editingIndex=i; editingPhoto=p.photo||'';
+  editId.value=p.id; editName.value=p.name; editRating.value=p.rating;
+  editAvatar.innerHTML=p.photo?`<img class="avatar" src="${p.photo}">`:`<div class="avatar">${esc((p.name||'?')[0])}</div>`;
+  editPhoto.value='';
+  editorOverlay.classList.add('show');
+}
+function closeEditor(){editorOverlay.classList.remove('show');editingIndex=-1;editingPhoto='';}
+editPhoto.onchange=e=>{
+  const f=e.target.files[0]; if(!f)return;
+  const r=new FileReader(); r.onload=()=>{editingPhoto=r.result; editAvatar.innerHTML=`<img class="avatar" src="${editingPhoto}">`;}; r.readAsDataURL(f);
+};
+function savePlayerEdit(){
+  if(editingIndex<0)return;
+  const n=editName.value.trim(); if(!n){toast('Digite o nome do jogador');return}
+  players[editingIndex].name=n;
+  players[editingIndex].rating=+editRating.value;
+  players[editingIndex].photo=editingPhoto;
+  save(); renderPlayers(); renderPresence(); closeEditor(); toast('Jogador atualizado!');
+}
+async function toggleScoreFullscreen(){
+  const score=document.getElementById('score');
+  if(!document.fullscreenElement){
+    try{await score.requestFullscreen();}catch(e){}
+    document.body.classList.add('fullscreen-score');
+    score.classList.add('fullscreen-mode');
+  }else{
+    try{await document.exitFullscreen();}catch(e){}
+    document.body.classList.remove('fullscreen-score');
+    score.classList.remove('fullscreen-mode');
+  }
+}
+document.addEventListener('fullscreenchange',()=>{
+  const active=!!document.fullscreenElement;
+  document.body.classList.toggle('fullscreen-score',active);
+  document.getElementById('score').classList.toggle('fullscreen-mode',active);
+});
+function point(side,v){if(side==='a')A=Math.max(0,A+v);else B=Math.max(0,B+v);aScore.textContent=A;bScore.textContent=B}
+function finishSet(){if(A===B){toast('O set não pode terminar empatado');return}sets.push([A,B]);setsEl();A=0;B=0;aScore.textContent=0;bScore.textContent=0}
+function setsEl(){sets.innerHTML=sets.length?sets.map((s,i)=>`<div class="set"><b>SET ${i+1}</b><br>🍺 ${s[0]} × ${s[1]} 🍻</div>`).join(''):'<div class="muted">Nenhum set finalizado.</div>'}
+function newGame(){A=B=0;sets=[];aScore.textContent=bScore.textContent=0;setsEl()}
+function finishGame(){let h=JSON.parse(localStorage.getItem(HKEY)||'[]');h.unshift({date:new Date().toLocaleString('pt-BR'),sets:[...sets]});localStorage.setItem(HKEY,JSON.stringify(h));toast('Jogo salvo no histórico')}
+function renderHistory(){let h=JSON.parse(localStorage.getItem(HKEY)||'[]');hist.innerHTML=h.length?h.map((x,i)=>`<div class="card"><b>🏐 ${x.date}</b><div class="setlist" style="margin-top:8px">${x.sets.map((s,j)=>`<div class="set">SET ${j+1}<br><b>${s[0]} × ${s[1]}</b></div>`).join('')}</div></div>`).join(''):'<div class="muted">Nenhuma partida registrada ainda.</div>'}
+function toast(s){let t=document.getElementById('toast');t.textContent=s;t.style.display='block';setTimeout(()=>t.style.display='none',1800)}
+renderPlayers();renderPresence();setsEl();
+
+
+document.querySelectorAll('.bottomnav button').forEach(b=>{
+  b.onclick=()=>{
+    if(b===document.querySelector('.bottomnav button:nth-child(3)')){
+      show('home');
+      setTimeout(()=>document.getElementById('nTeams').scrollIntoView({behavior:'smooth'}),50);
+    }else{
+      show(b.dataset.s);
+    }
+    document.querySelectorAll('.bottomnav button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+  };
+});
+
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+}
+</script>
+</body>
+</html>
