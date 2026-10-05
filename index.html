@@ -124,6 +124,7 @@ body.fullscreen-score main{max-width:none;width:100%;padding:0}
       <button onclick="show('history')"><span>◷</span>Histórico e Ranking</button>
       <button onclick="show('tournament')"><span>🏆</span>Torneio</button>
       <button onclick="show('players')"><span>⚙</span>Configurações</button>
+      <button onclick="refreshApp()"><span>🔄</span>Atualizar aplicativo</button>
     </div>
     <div class="featurebar"><div class="feature"><b>☆</b>Classificação<br>1 a 5 estrelas</div><div class="feature"><b>♙</b>Sorteio<br>equilibrado</div><div class="feature"><b>📱</b>100% gratuito</div></div>
   </div>
@@ -274,6 +275,23 @@ function recordTournamentWinner(tid,mid,winner){const t=tournaments.find(x=>x.id
 function renderTournament(){const tv=document.getElementById('tournamentView');if(!tv)return;const t=tournaments[0];if(!t){tv.innerHTML='<div class="muted">Nenhum torneio criado ainda. Crie um usando os times sorteados.</div>';if(document.getElementById('tourDate'))tourDate.value=localISO();return}const teamMap=Object.fromEntries(t.teams.map(x=>[x.id,x]));const photoForTeam=id=>{const ct=currentTeams.find(q=>q.id===id);const pp=ct?.players?.map(pid=>players.find(q=>String(q.id)===String(pid))).find(Boolean);return pp?.photo||''};const standings=[...t.teams].sort((a,b)=>b.wins-a.wins||a.name.localeCompare(b.name,'pt-BR'));const rows=standings.map((x,i)=>`<tr><td>${i+1}</td><td><span class="photo-name">${photoForTeam(x.id)?`<img class="rank-avatar" src="${photoForTeam(x.id)}">`:''}${esc(x.name)}</span></td><td>${x.wins}</td><td>${x.losses}</td></tr>`).join('');const matches=t.matches.map(m=>{const a=teamMap[m.a]?.name||'Equipe';const b=m.b?teamMap[m.b]?.name||'Equipe':'Folga';return `<div class="tmatch"><select onchange="recordTournamentWinner(${t.id},'${m.id}',this.value)"><option value="">${m.winner?'Resultado registrado':'Escolher vencedor'}</option><option value="${m.a}" ${m.winner===m.a?'selected':''}>${esc(a)}</option>${m.b?`<option value="${m.b}" ${m.winner===m.b?'selected':''}>${esc(b)}</option>`:'<option value="'+m.a+'">'+esc(a)+' (folga)</option>'}</select><span>×</span><div>${esc(a)} ${m.b?'× '+esc(b):'— folga'}</div><span class="done">${m.winner?'✓':''}</span></div>`}).join('');tv.innerHTML=`<div class="section-title"><div><b>${esc(t.name)}</b><div class="muted">${fmtDate(t.date)} • ${t.format==='roundrobin'?'Todos contra todos':'Mata-mata'}</div></div></div><h3 style="font-size:12px">Classificação</h3><table class="rank-table"><thead><tr><th>#</th><th>Equipe</th><th>V</th><th>D</th></tr></thead><tbody>${rows}</tbody></table><h3 style="font-size:12px;margin-top:14px">Partidas</h3>${matches}`;tourDate.value=t.date}
 
 function toast(s){let t=document.getElementById('toast');t.textContent=s;t.style.display='block';setTimeout(()=>t.style.display='none',1800)}
+async function refreshApp(){
+  const b=[...document.querySelectorAll('.home-menu button')].find(x=>x.textContent.includes('Atualizar aplicativo'));
+  if(b){b.disabled=true;b.innerHTML='<span>⏳</span>Atualizando...'}
+  try{
+    if('serviceWorker' in navigator){
+      const regs=await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r=>r.unregister()));
+    }
+    if('caches' in window){
+      const keys=await caches.keys();
+      await Promise.all(keys.map(k=>caches.delete(k)));
+    }
+  }catch(e){}
+  const u=new URL(location.href);
+  u.searchParams.set('atualizado',Date.now());
+  location.replace(u.toString());
+}
 
 // Compatibilidade com histórico antigo: registros antigos continuam visíveis.
 renderPlayers();renderPresence();setsEl();renderTeams();populateMatchTeams();renderHistory();renderTournament();
