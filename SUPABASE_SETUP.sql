@@ -28,16 +28,16 @@ alter table public.group_members enable row level security;
 alter table public.group_state enable row level security;
 
 drop policy if exists groups_member_select on public.groups;
-create policy groups_member_select on public.groups for select to authenticated using (exists (select 1 from public.group_members m where m.group_id=id and m.user_id=auth.uid()));
+create policy groups_member_select on public.groups for select to authenticated using (exists (select 1 from public.group_members m where m.group_id=public.groups.id and m.user_id=auth.uid()));
 
 drop policy if exists members_self_select on public.group_members;
 create policy members_self_select on public.group_members for select to authenticated using (user_id=auth.uid());
 
 drop policy if exists state_member_select on public.group_state;
-create policy state_member_select on public.group_state for select to authenticated using (exists (select 1 from public.group_members m where m.group_id=group_id and m.user_id=auth.uid()));
+create policy state_member_select on public.group_state for select to authenticated using (exists (select 1 from public.group_members m where m.group_id=public.group_state.group_id and m.user_id=auth.uid()));
 
 drop policy if exists state_member_update on public.group_state;
-create policy state_member_update on public.group_state for update to authenticated using (exists (select 1 from public.group_members m where m.group_id=group_id and m.user_id=auth.uid())) with check (exists (select 1 from public.group_members m where m.group_id=group_id and m.user_id=auth.uid()));
+create policy state_member_update on public.group_state for update to authenticated using (exists (select 1 from public.group_members m where m.group_id=public.group_state.group_id and m.user_id=auth.uid())) with check (exists (select 1 from public.group_members m where m.group_id=public.group_state.group_id and m.user_id=auth.uid()));
 
 drop function if exists public.create_group(text,text);
 create or replace function public.create_group(p_name text,p_code text)
@@ -74,4 +74,10 @@ grant select on public.group_members to authenticated;
 grant select,update on public.group_state to authenticated;
 
 -- No painel do Supabase: Authentication > Providers > Anonymous = ON.
--- Depois, Database > Replication: adicione public.group_state à publicação supabase_realtime.
+-- Realtime: adiciona group_state à publicação apenas se ainda não estiver nela.
+do $$
+begin
+  if not exists (select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='group_state') then
+    alter publication supabase_realtime add table public.group_state;
+  end if;
+end $$;
