@@ -1,14 +1,27 @@
-# Cerveja na Rede — V7
+# Cerveja na Rede — V10 Online
 
-Versão com ranking avançado de jogadores.
+Esta versão mantém todos os recursos anteriores e adiciona **grupo online compartilhado**.
 
-## Novidades
-- Ranking geral de jogadores.
-- Abas por fundamento: Ataque, Defesa, Bloqueio, Ace, Passe, Saque e Levantamento.
-- Destaques automáticos: jogador mais completo e líder de cada fundamento.
-- Filtro por período continua valendo para os rankings.
-- Histórico de cada partida continua mostrando as estatísticas individuais.
-- Registro de estatísticas durante a partida com + e −.
+## O que mudou
+- ☁️ Criar grupo por código (ex.: CRN-8472)
+- ↗ Entrar em um grupo pelo código
+- 🔄 Sincronização em tempo real entre celulares
+- 👥 Jogadores, fotos, estrelas, posições e presença compartilhados
+- 🎲 Sorteios e times compartilhados
+- 🏆 Placar, sets e estatísticas compartilhados
+- 📊 Histórico, ranking e torneios compartilhados
+- 📴 Continua funcionando localmente quando não há internet
 
-## Publicação
-Substitua os arquivos do repositório GitHub Pages pelos arquivos desta pasta, mantendo `index.html`, `logo.png`, `manifest.json` e `sw.js` na raiz.
+## Configuração do banco
+
+1. Crie um projeto gratuito no Supabase.
+2. Em **Authentication → Providers**, ative **Anonymous sign-ins**.
+3. Abra **SQL Editor** e execute o arquivo `SUPABASE_SETUP.sql`.
+4. Em **Database → Replication**, adicione `public.group_state` à publicação `supabase_realtime`.
+5. No Cerveja na Rede, toque em **☁️ Grupo online → ⚙️** e informe:
+   - Project URL
+   - chave **anon/public**
+
+**Nunca coloque a chave `service_role` no aplicativo.**
+
+Depois disso, crie um grupo e passe o código para as outras pessoas. Todos os celulares que entrarem pelo mesmo código verão os mesmos dados.
