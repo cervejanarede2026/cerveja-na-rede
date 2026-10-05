@@ -61,6 +61,7 @@ input,select{width:100%;border:1px solid #2a4654;border-radius:9px;padding:9px;b
 .team h3{margin:0 0 2px;font-size:13px}.strength{font-weight:900;color:var(--gold);font-size:10px}
 .team ul{list-style:none;margin:7px 0 0;padding:0}.team li{display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid #203a45;font-size:10px}
 .team .p{font-weight:800}.team .btn{font-size:10px;padding:8px}
+.team-controls{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}.team-controls input,.team-controls select{font-size:10px;padding:7px}.player-move{font-size:9px;padding:5px 6px!important}.rank-table{width:100%;border-collapse:collapse}.rank-table th,.rank-table td{text-align:left;padding:8px 6px;border-bottom:1px solid #203943;font-size:10px}.rank-table th{color:var(--gold)}.tmatch{display:grid;grid-template-columns:1fr auto 1fr auto;gap:5px;align-items:center;padding:8px;border-top:1px solid #203943;font-size:10px}.tmatch select{font-size:10px;padding:7px}.tmatch .done{color:#7ee787;font-weight:900}.backhome{margin-bottom:9px}.backhome button{font-size:10px}.counter{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:22px;border-radius:999px;background:#102b38;color:var(--gold);font-weight:900;padding:0 7px}.smallbtn{font-size:10px!important;padding:7px 9px!important}
 .draw-title{display:flex;align-items:center;gap:8px}.draw-title .back{color:#fff;font-size:20px}
 .segment{display:flex;gap:4px;background:#07141d;padding:4px;border-radius:9px}.segment button{flex:1;border:0;background:#142c38;color:#d9e2e6;border-radius:7px;padding:8px;font-weight:900;font-size:11px}.segment button.active{background:var(--gold);color:#111}
 .scoreboard{display:grid;grid-template-columns:1fr 28px 1fr;gap:6px;align-items:center;text-align:center}
@@ -71,6 +72,7 @@ input,select{width:100%;border:1px solid #2a4654;border-radius:9px;padding:9px;b
 .setlist{display:flex;gap:6px;overflow:auto}.set{min-width:92px;background:#0d2733;border:1px solid #294653;border-radius:9px;padding:8px;text-align:center;font-size:10px}
 .winner{outline:2px solid var(--gold)}
 .table{width:100%;border-collapse:collapse}.table th,.table td{text-align:left;padding:8px;border-bottom:1px solid #203943;font-size:10px}
+.stat-team{border:1px solid #294653;border-radius:12px;padding:9px;margin-bottom:8px;background:#091b25}.stat-team h3{margin:0 0 7px;font-size:12px;color:var(--gold)}.stat-player{padding:8px 0;border-top:1px solid #203943}.stat-player:first-child{border-top:0}.stat-player-name{font-size:11px;font-weight:900;margin-bottom:6px}.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:5px}.stat-item{display:flex;align-items:center;justify-content:space-between;gap:4px;background:#0d2733;border:1px solid #294653;border-radius:8px;padding:5px}.stat-item span{font-size:9px;color:#dce4e8}.stat-item b{min-width:20px;text-align:center;color:var(--gold);font-size:11px}.stat-item button{border:0;border-radius:6px;background:#102f3d;color:#fff;width:25px;height:25px;font-weight:950;cursor:pointer}.stat-total{margin-top:5px;font-size:9px;color:var(--muted);font-weight:800}.rank-highlights{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:8px}.rank-highlight{background:#0d2733;border:1px solid #294653;border-radius:10px;padding:8px}.rank-highlight b{display:block;color:var(--gold);font-size:9px}.rank-highlight strong{display:block;font-size:12px;margin-top:2px}.rank-highlight span{display:block;color:var(--muted);font-size:9px;margin-top:2px}.rank-tabs{overflow:auto;justify-content:flex-start;margin-bottom:8px}.rank-tabs button{min-width:max-content;padding:7px 9px}.player-rank-card{margin-top:8px}.player-rank-card .rank-table td,.player-rank-card .rank-table th{font-size:9px;padding:7px 4px}
 .bottomnav{position:fixed;bottom:0;left:0;right:0;height:68px;background:#07131c;border-top:1px solid #29404b;z-index:80;display:grid;grid-template-columns:repeat(5,1fr)}
 .bottomnav button{border:0;background:transparent;color:#82939c;font-size:9px;font-weight:800}.bottomnav button b{display:block;font-size:17px;margin-bottom:2px}.bottomnav button.active{color:var(--gold)}
 .editor-overlay{position:fixed;inset:0;background:#000b;display:none;align-items:flex-end;justify-content:center;padding:0;z-index:200}
@@ -101,7 +103,7 @@ body.fullscreen-score main{max-width:none;width:100%;padding:0}
 <div id="editorOverlay" class="editor-overlay"><div class="editor">
   <h3>✏️ Editar jogador</h3>
   <input type="hidden" id="editId">
-  <div class="grid"><div><label>Nome / apelido</label><input id="editName"></div><div><label>Estrelas</label><select id="editRating"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div></div>
+  <div class="grid"><div><label>Nome / apelido</label><input id="editName"></div><div><label>Estrelas</label><select id="editRating"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div><div><label>Posição</label><select id="editPos"><option>Coringa</option><option>Levantador</option><option>Ponteiro</option><option>Oposto</option><option>Central</option><option>Líbero</option></select></div></div>
   <div class="editphoto"><div id="editAvatar"></div><div style="flex:1"><label>Alterar foto</label><input id="editPhoto" type="file" accept="image/*"></div></div>
   <div class="editor-actions"><button class="btn primary" onclick="savePlayerEdit()">Salvar alterações</button><button class="btn ghost" onclick="closeEditor()">Cancelar</button></div>
 </div></div>
@@ -118,7 +120,8 @@ body.fullscreen-score main{max-width:none;width:100%;padding:0}
       <button onclick="document.getElementById('presence').scrollIntoView({behavior:'smooth'})"><span>👥</span>Participantes</button>
       <button onclick="draw()"><span>⚽</span>Sorteio de Times</button>
       <button onclick="show('score')"><span>▣</span>Placar</button>
-      <button onclick="show('history')"><span>◷</span>Histórico</button>
+      <button onclick="show('history')"><span>◷</span>Histórico e Ranking</button>
+      <button onclick="show('tournament')"><span>🏆</span>Torneio</button>
       <button onclick="show('players')"><span>⚙</span>Configurações</button>
     </div>
     <div class="featurebar"><div class="feature"><b>☆</b>Classificação<br>1 a 5 estrelas</div><div class="feature"><b>♙</b>Sorteio<br>equilibrado</div><div class="feature"><b>📱</b>100% gratuito</div></div>
@@ -130,11 +133,17 @@ body.fullscreen-score main{max-width:none;width:100%;padding:0}
     <div style="margin-top:9px"><button class="btn primary big full" onclick="draw()">Sortear Times</button></div>
   </div>
   <div id="teams" class="grid"></div>
+  <div id="matchSetup" class="card hidden">
+    <div class="section-title"><h2>🏐 Preparar partida</h2></div>
+    <div class="grid"><div><label>Equipe 1</label><select id="matchTeamA"></select></div><div><label>Equipe 2</label><select id="matchTeamB"></select></div></div>
+    <div class="grid" style="margin-top:8px"><div><label>Data da partida</label><input id="matchDate" type="date"></div><div style="display:flex;align-items:end"><button class="btn primary full" onclick="startMatch()">Abrir placar</button></div></div>
+  </div>
 </section>
 
 <section id="players" class="screen hidden">
+  <div class="backhome"><button class="btn ghost" onclick="show('home')">← Início</button></div>
   <div class="card">
-    <div class="section-title"><h2>👥 Jogadores</h2><button class="btn primary" onclick="document.getElementById('name').focus()">＋ Adicionar</button></div>
+    <div class="section-title"><h2>👥 Jogadores <span id="playerCount" class="counter">0</span></h2><div style="display:flex;gap:5px"><button class="btn ghost smallbtn" onclick="sortPlayersAZ()">A–Z</button><button class="btn primary smallbtn" onclick="document.getElementById('name').focus()">＋ Adicionar</button></div></div>
     <div id="plist"></div>
   </div>
   <div class="card">
@@ -146,17 +155,48 @@ body.fullscreen-score main{max-width:none;width:100%;padding:0}
 </section>
 
 <section id="score" class="screen hidden">
+  <div class="backhome"><button class="btn ghost" onclick="show('home')">← Início</button></div>
   <div class="card hero"><div class="section-title"><div><h2>🏆 Placar</h2><p>Controle pontos e sets durante a partida.</p></div><button class="btn primary" onclick="toggleScoreFullscreen()">⛶ Tela inteira</button></div></div>
   <div class="card"><div class="scoreboard">
-    <div class="scorebox"><div>TIME A</div><div class="score" id="aScore">0</div><div class="scorebuttons"><button onclick="point('a',-1)">−1</button><button onclick="point('a',1)">+1</button></div></div>
+    <div class="scorebox"><div id="aTeamName">TIME A</div><div class="score" id="aScore">0</div><div class="scorebuttons"><button onclick="point('a',-1)">−1</button><button onclick="point('a',1)">+1</button></div></div>
     <div class="vs">×</div>
-    <div class="scorebox red"><div>TIME B</div><div class="score" id="bScore">0</div><div class="scorebuttons"><button onclick="point('b',-1)">−1</button><button onclick="point('b',1)">+1</button></div></div>
+    <div class="scorebox red"><div id="bTeamName">TIME B</div><div class="score" id="bScore">0</div><div class="scorebuttons"><button onclick="point('b',-1)">−1</button><button onclick="point('b',1)">+1</button></div></div>
   </div><div style="margin-top:9px"><button class="btn primary full" onclick="finishSet()">Finalizar Set</button></div></div>
-  <div class="card"><div class="section-title"><h2>Sets</h2><div style="display:flex;gap:5px"><button class="btn ghost" onclick="toggleScoreFullscreen()">⛶ Tela inteira</button><button class="btn ghost" onclick="newGame()">Novo jogo</button></div></div><div id="sets" class="setlist"><div class="muted">Nenhum set finalizado.</div></div></div>
+  <div class="card"><div class="section-title"><h2>Sets</h2><div style="display:flex;gap:5px"><button class="btn ghost" onclick="toggleScoreFullscreen()">⛶ Tela inteira</button><button class="btn ghost" onclick="newGame()">Novo jogo</button></div></div><div id="sets" class="setlist"><div class="muted">Nenhum set finalizado.</div></div><button class="btn primary full" style="margin-top:10px" onclick="finishGame()">✅ Finalizar partida e salvar</button></div>
+  <div class="card"><div class="section-title"><div><h2>📈 Estatísticas da partida</h2><p class="muted">Toque em + a cada ação realizada. Use − para corrigir.</p></div><button class="btn ghost smallbtn" onclick="resetMatchStats()">Zerar</button></div><div id="matchStatsView"></div></div>
 </section>
 
 <section id="history" class="screen hidden">
-  <div class="card"><div class="section-title"><h2>📊 Histórico</h2><button class="btn danger" onclick="localStorage.removeItem('cnr_hist');renderHistory()">Limpar</button></div><div id="hist"></div></div>
+  <div class="backhome"><button class="btn ghost" onclick="show('home')">← Início</button></div>
+  <div class="card"><div class="section-title"><h2>📊 Ranking de vitórias</h2><button class="btn danger smallbtn" onclick="clearHistory()">Limpar</button></div>
+    <div class="grid"><div><label>De</label><input id="rankFrom" type="date" onchange="renderHistory()"></div><div><label>Até</label><input id="rankTo" type="date" onchange="renderHistory()"></div></div>
+    <div id="ranking" style="margin-top:8px"></div>
+  </div>
+  <div class="card"><div class="section-title"><h2>👤 Ranking de jogadores</h2><span class="muted">período selecionado</span></div>
+    <div id="playerHighlights" class="rank-highlights"></div>
+    <div class="segment rank-tabs" id="playerRankTabs">
+      <button data-mode="total" class="active" onclick="setPlayerRankMode('total')">Geral</button>
+      <button data-mode="attack" onclick="setPlayerRankMode('attack')">Ataque</button>
+      <button data-mode="defense" onclick="setPlayerRankMode('defense')">Defesa</button>
+      <button data-mode="block" onclick="setPlayerRankMode('block')">Bloqueio</button>
+      <button data-mode="ace" onclick="setPlayerRankMode('ace')">Ace</button>
+      <button data-mode="perfectPass" onclick="setPlayerRankMode('perfectPass')">Passe</button>
+      <button data-mode="serveWinner" onclick="setPlayerRankMode('serveWinner')">Saque</button>
+      <button data-mode="assist" onclick="setPlayerRankMode('assist')">Levant.</button>
+    </div>
+    <div id="playerRanking" class="player-rank-card"></div>
+  </div>
+  <div class="card"><div class="section-title"><h2>📅 Partidas</h2></div><div id="hist"></div></div>
+</section>
+
+<section id="tournament" class="screen hidden">
+  <div class="backhome"><button class="btn ghost" onclick="show('home')">← Início</button></div>
+  <div class="card"><div class="section-title"><h2>🏆 Criar torneio</h2></div>
+    <div class="grid"><div><label>Nome do torneio</label><input id="tourName" placeholder="Ex.: Torneio de Terça"></div><div><label>Data</label><input id="tourDate" type="date"></div></div>
+    <div style="margin-top:8px"><label>Formato</label><select id="tourFormat"><option value="roundrobin">Todos contra todos</option><option value="knockout">Mata-mata</option></select></div>
+    <button class="btn primary full" style="margin-top:9px" onclick="createTournament()">Criar torneio com os times sorteados</button>
+  </div>
+  <div class="card"><div class="section-title"><h2>🏆 Torneio atual</h2><button class="btn ghost smallbtn" onclick="renderTournament()">Atualizar</button></div><div id="tournamentView"></div></div>
 </section>
 </main>
 
@@ -171,83 +211,73 @@ body.fullscreen-score main{max-width:none;width:100%;padding:0}
 
 <script>
 
-const PKEY='cnr_players_final', HKEY='cnr_hist';let players=JSON.parse(localStorage.getItem(PKEY)||'[]'), selectedPhoto='', present={};let A=0,B=0,sets=[];
+const PKEY='cnr_players_final', HKEY='cnr_hist', TKEY='cnr_tournaments';
+let players=JSON.parse(localStorage.getItem(PKEY)||'[]');
+let selectedPhoto='', A=0,B=0,sets=[];
+let currentTeams=JSON.parse(localStorage.getItem('cnr_current_teams')||'null')||[];
+let matchMeta=JSON.parse(localStorage.getItem('cnr_match_meta')||'null')||null;
+let tournaments=JSON.parse(localStorage.getItem(TKEY)||'[]');
+const STAT_DEFS=[['attack','Ataque'],['defense','Defesa'],['block','Bloqueio'],['ace','Ace'],['perfectPass','Passe perfeito'],['serveWinner','Saque vencedor'],['assist','Levantamento decisivo']];
+let matchStats=JSON.parse(localStorage.getItem('cnr_match_stats')||'{}');
+let playerRankMode='total';
+
 function save(){localStorage.setItem(PKEY,JSON.stringify(players))}
 function stars(n){return '⭐'.repeat(n)+'☆'.repeat(5-n)}
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.s===id));if(id==='players')renderPlayers();if(id==='history')renderHistory();if(id==='home')renderPresence()}
-document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>show(b.dataset.s));
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function localISO(){const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)}
+function fmtDate(v){if(!v)return '—';const m=String(v).match(/^(\\d{4})-(\\d{2})-(\\d{2})$/);return m?`${m[3]}/${m[2]}/${m[1]}`:String(v)}
+function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');if(id==='players')renderPlayers();if(id==='history')renderHistory();if(id==='home')renderPresence();if(id==='tournament')renderTournament();window.scrollTo(0,0)}
+document.querySelectorAll('.bottomnav button').forEach(b=>b.onclick=()=>{if(b.dataset.s==='home'&&b.textContent.includes('Sorteio')){show('home');setTimeout(()=>document.getElementById('nTeams').scrollIntoView({behavior:'smooth'}),50)}else show(b.dataset.s)});
+
 function addPlayer(){let n=document.getElementById('name').value.trim();if(!n){toast('Digite o nome do jogador');return}players.push({id:Date.now()+Math.random(),name:n,rating:+rating.value,pos:pos.value,photo:selectedPhoto,present:true});save();name.value='';photo.value='';selectedPhoto='';renderPlayers();renderPresence();toast('Jogador adicionado!')}
 photo.onchange=e=>{let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>selectedPhoto=r.result;r.readAsDataURL(f)}
 function removePlayer(i){players.splice(i,1);save();renderPlayers();renderPresence()}
 function clearPlayers(){if(confirm('Apagar todos os jogadores?')){players=[];save();renderPlayers();renderPresence()}}
-function seed(){players=[['Reinaldo',4,'Ponteiro'],['Carlos',5,'Levantador'],['João',3,'Central'],['Marcos',4,'Oposto'],['André',2,'Ponteiro'],['Rafael',5,'Líbero'],['Felipe',3,'Ponteiro'],['Bruno',3,'Coringa'],['Paulo',2,'Central'],['Diego',4,'Oposto'],['Caio',2,'Ponteiro'],['Lucas',3,'Coringa']].map((x,i)=>({id:i,name:x[0],rating:x[1],pos:x[2],photo:'',present:true}));save();renderPlayers();renderPresence();toast('Exemplos adicionados')}
-function renderPlayers(){plist.innerHTML=players.length?players.map((p,i)=>`<div class="card playerrow"><button class="x" onclick="removePlayer(${i})">×</button><div class="player">${p.photo?`<img class="avatar" src="${p.photo}">`:`<div class="avatar">${esc((p.name||'?')[0])}</div>`}<div><div class="pname">${esc(p.name)}</div><div class="stars">${stars(p.rating)}</div><div class="muted">${esc(p.pos)}</div></div><div class="player-actions"><button class="ghost" onclick="editPlayer(${i})">✏️ Editar</button></div></div></div>`).join(''):'<div class="muted">Cadastre os jogadores do grupo.</div>'}
-function renderPresence(){pc.textContent=players.filter(p=>p.present!==false).length;presence.innerHTML=players.length?players.map(p=>`<label class="check"><input type="checkbox" ${p.present!==false?'checked':''} onchange="togglePresent('${p.id}')"><span><b>${esc(p.name)}</b> <span class="stars">${stars(p.rating)}</span> <span class="muted">${esc(p.pos)}</span></span></label>`).join(''):'<div class="muted">Nenhum jogador cadastrado.</div>'}
-function togglePresent(id){let p=players.find(x=>String(x.id)===String(id));p.present=!p.present;save();renderPresence()}
-function draw(){let ps=players.filter(p=>p.present!==false);let n=+nTeams.value;if(ps.length<n){toast('Não há participantes suficientes');return}let per=+nPer.value;if(per&&ps.length<n*per){toast('Não há jogadores suficientes para essa configuração');return}ps=[...ps].sort((a,b)=>b.rating-a.rating);let t=Array.from({length:n},()=>[]);let main=per?ps.slice(0,n*per):ps;let extras=per?ps.slice(n*per):[];main.forEach((p,i)=>t[i%n].push(p));let html=t.map((team,i)=>{let total=team.reduce((s,p)=>s+p.rating,0);return `<div class="team"><h3>TIME ${String.fromCharCode(65+i)} ${i%2?'🍻':'🍺'}</h3><div class="strength">Força: ${total} ⭐</div><ul>${team.map(p=>`<li><span class="p">${esc(p.name)}</span><span class="stars">${stars(p.rating)}</span></li>`).join('')}</ul><button class="btn dark full" style="margin-top:10px" onclick="show('score')">🏆 Iniciar jogo</button></div>`}).join('');if(extras.length){let total=extras.reduce((s,p)=>s+p.rating,0);html+=`<div class="team" style="border:2px dashed #f2b84b"><h3>FORA DO SORTEIO 👥</h3><div class="strength">${extras.length} jogador${extras.length===1?'':'es'} • Força: ${total} ⭐</div><ul>${extras.map(p=>`<li><span class="p">${esc(p.name)}</span><span class="stars">${stars(p.rating)}</span></li>`).join('')}</ul></div>`}teams.innerHTML=html;toast(extras.length?'Times sorteados! Jogadores restantes ficaram de fora.':'Times sorteados!')}
+function sortPlayersAZ(){players.sort((a,b)=>a.name.localeCompare(b.name,'pt-BR',{sensitivity:'base'}));save();renderPlayers();renderPresence();toast('Jogadores em ordem alfabética')}
+function renderPlayers(){players.sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'pt-BR',{sensitivity:'base'}));save();document.getElementById('playerCount').textContent=players.length;plist.innerHTML=players.length?players.map((p,i)=>`<div class="card playerrow"><button class="x" onclick="removePlayer(${i})">×</button><div class="player"><div class="counter">${i+1}</div>${p.photo?`<img class="avatar" src="${p.photo}">`:`<div class="avatar">${esc((p.name||'?')[0])}</div>`}<div><div class="pname">${esc(p.name)}</div><div class="stars">${stars(p.rating)}</div><div class="muted">${esc(p.pos||'Coringa')}</div></div><div class="player-actions"><button class="ghost" onclick="editPlayer(${i})">✏️ Editar</button></div></div></div>`).join(''):'<div class="muted">Cadastre os jogadores do grupo.</div>'}
+function renderPresence(){players.sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'pt-BR',{sensitivity:'base'}));save();pc.textContent=players.filter(p=>p.present!==false).length;presence.innerHTML=players.length?players.map((p,i)=>`<label class="check"><input type="checkbox" ${p.present!==false?'checked':''} onchange="togglePresent('${p.id}')"><span><b>${i+1}. ${esc(p.name)}</b> <span class="stars">${stars(p.rating)}</span> <span class="muted">${esc(p.pos||'Coringa')}</span></span></label>`).join(''):'<div class="muted">Nenhum jogador cadastrado.</div>'}
+function togglePresent(id){let p=players.find(x=>String(x.id)===String(id));if(!p)return;p.present=!p.present;save();renderPresence()}
 
-let editingIndex=-1, editingPhoto='';
-function editPlayer(i){
-  const p=players[i]; if(!p)return;
-  editingIndex=i; editingPhoto=p.photo||'';
-  editId.value=p.id; editName.value=p.name; editRating.value=p.rating;
-  editAvatar.innerHTML=p.photo?`<img class="avatar" src="${p.photo}">`:`<div class="avatar">${esc((p.name||'?')[0])}</div>`;
-  editPhoto.value='';
-  editorOverlay.classList.add('show');
-}
-function closeEditor(){editorOverlay.classList.remove('show');editingIndex=-1;editingPhoto='';}
-editPhoto.onchange=e=>{
-  const f=e.target.files[0]; if(!f)return;
-  const r=new FileReader(); r.onload=()=>{editingPhoto=r.result; editAvatar.innerHTML=`<img class="avatar" src="${editingPhoto}">`;}; r.readAsDataURL(f);
-};
-function savePlayerEdit(){
-  if(editingIndex<0)return;
-  const n=editName.value.trim(); if(!n){toast('Digite o nome do jogador');return}
-  players[editingIndex].name=n;
-  players[editingIndex].rating=+editRating.value;
-  players[editingIndex].photo=editingPhoto;
-  save(); renderPlayers(); renderPresence(); closeEditor(); toast('Jogador atualizado!');
-}
-async function toggleScoreFullscreen(){
-  const score=document.getElementById('score');
-  if(!document.fullscreenElement){
-    try{await score.requestFullscreen();}catch(e){}
-    document.body.classList.add('fullscreen-score');
-    score.classList.add('fullscreen-mode');
-  }else{
-    try{await document.exitFullscreen();}catch(e){}
-    document.body.classList.remove('fullscreen-score');
-    score.classList.remove('fullscreen-mode');
-  }
-}
-document.addEventListener('fullscreenchange',()=>{
-  const active=!!document.fullscreenElement;
-  document.body.classList.toggle('fullscreen-score',active);
-  document.getElementById('score').classList.toggle('fullscreen-mode',active);
-});
+function draw(){let ps=players.filter(p=>p.present!==false);let n=+nTeams.value;if(ps.length<n){toast('Não há participantes suficientes');return}let per=+nPer.value;if(per&&ps.length<n*per){toast('Não há jogadores suficientes para essa configuração');return}ps=[...ps].sort((a,b)=>b.rating-a.rating);let t=Array.from({length:n},(_,i)=>({id:'t'+i,name:`TIME ${String.fromCharCode(65+i)}`,players:[]}));let main=per?ps.slice(0,n*per):ps;let extras=per?ps.slice(n*per):[];main.forEach((p,i)=>t[i%n].players.push(p.id));currentTeams=t.map(x=>({...x}));localStorage.setItem('cnr_current_teams',JSON.stringify(currentTeams));renderTeams(extras);populateMatchTeams();toast(extras.length?'Times sorteados! Jogadores restantes ficaram de fora.':'Times sorteados!')}
+function teamName(i){return currentTeams[i]?.name||`TIME ${String.fromCharCode(65+i)}`}
+function renderTeams(extras=null){if(!currentTeams.length){teams.innerHTML='';document.getElementById('matchSetup').classList.add('hidden');return}let extraIds=extras?extras.map(p=>p.id):[];if(extras===null){let assigned=new Set(currentTeams.flatMap(t=>t.players));extraIds=players.filter(p=>p.present!==false&&!assigned.has(p.id)).map(p=>p.id)}let html=currentTeams.map((team,i)=>{let members=team.players.map(id=>players.find(p=>String(p.id)===String(id))).filter(Boolean);let total=members.reduce((s,p)=>s+p.rating,0);return `<div class="team"><h3>${esc(team.name)}</h3><div class="strength">Força: ${total} ⭐ • ${members.length} jogador${members.length===1?'':'es'}</div><div class="team-controls"><input value="${esc(team.name)}" onchange="renameTeam(${i},this.value)" aria-label="Nome do time"><button class="btn dark" onclick="selectMatchTeam(${i})">🏆 Jogar</button></div><ul>${members.map(p=>`<li><span class="p">${esc(p.name)}</span><span style="display:flex;align-items:center;gap:5px"><span class="stars">${stars(p.rating)}</span><select class="player-move" onchange="movePlayer('${p.id}',this.value)"><option value="">Mudar time</option>${currentTeams.map((_,j)=>`<option value="${j}">${esc(teamName(j))}</option>`).join('')}<option value="-1">Fora do sorteio</option></select></span></li>`).join('')}</ul></div>`}).join('');let extraPlayers=extraIds.map(id=>players.find(p=>String(p.id)===String(id))).filter(Boolean);if(extraPlayers.length){html+=`<div class="team" style="border:2px dashed #f2b84b"><h3>FORA DO SORTEIO 👥</h3><div class="strength">${extraPlayers.length} jogador${extraPlayers.length===1?'':'es'}</div><ul>${extraPlayers.map(p=>`<li><span class="p">${esc(p.name)}</span><span style="display:flex;align-items:center;gap:5px"><span class="stars">${stars(p.rating)}</span><select class="player-move" onchange="movePlayer('${p.id}',this.value)"><option value="">Mudar time</option>${currentTeams.map((_,j)=>`<option value="${j}">${esc(teamName(j))}</option>`).join('')}</select></span></li>`).join('')}</ul></div>`}teams.innerHTML=html;document.getElementById('matchSetup').classList.remove('hidden');populateMatchTeams()}
+function renameTeam(i,name){name=(name||'').trim();if(!name)name=`TIME ${String.fromCharCode(65+i)}`;currentTeams[i].name=name;localStorage.setItem('cnr_current_teams',JSON.stringify(currentTeams));renderTeams()}
+function movePlayer(pid,target){if(target==='')return;const p=players.find(x=>String(x.id)===String(pid));if(!p)return;currentTeams.forEach(t=>t.players=t.players.filter(id=>String(id)!==String(pid)));if(+target>=0&&+target<currentTeams.length)currentTeams[+target].players.push(p.id);localStorage.setItem('cnr_current_teams',JSON.stringify(currentTeams));renderTeams();toast(+target>=0?'Jogador mudou de time':'Jogador ficou fora do sorteio')}
+function populateMatchTeams(){if(!currentTeams.length)return;const a=document.getElementById('matchTeamA'),b=document.getElementById('matchTeamB');a.innerHTML=currentTeams.map((t,i)=>`<option value="${i}">${esc(t.name)}</option>`).join('');b.innerHTML=currentTeams.map((t,i)=>`<option value="${i}">${esc(t.name)}</option>`).join('');if(currentTeams.length>1)b.value='1';document.getElementById('matchDate').value=(matchMeta&&matchMeta.date)||localISO()}
+function selectMatchTeam(i){const a=document.getElementById('matchTeamA');if(!a)return;a.value=String(i);if(+document.getElementById('matchTeamB').value===i&&currentTeams.length>1)document.getElementById('matchTeamB').value=String(i===0?1:0);document.getElementById('matchSetup').scrollIntoView({behavior:'smooth'})}
+function startMatch(){const ia=+matchTeamA.value,ib=+matchTeamB.value;if(ia===ib){toast('Escolha duas equipes diferentes');return}matchMeta={date:matchDate.value||localISO(),teamA:currentTeams[ia]?.name||'TIME A',teamB:currentTeams[ib]?.name||'TIME B',teamAIndex:ia,teamBIndex:ib};localStorage.setItem('cnr_match_meta',JSON.stringify(matchMeta));matchStats={};localStorage.setItem('cnr_match_stats','{}');newGame();aTeamName.textContent=matchMeta.teamA;bTeamName.textContent=matchMeta.teamB;renderMatchStats();show('score');toast('Partida preparada')}
+
+let editingIndex=-1,editingPhoto='';
+function editPlayer(i){const p=players[i];if(!p)return;editingIndex=i;editingPhoto=p.photo||'';editId.value=p.id;editName.value=p.name;editRating.value=p.rating;editPos.value=p.pos||'Coringa';editAvatar.innerHTML=p.photo?`<img class="avatar" src="${p.photo}">`:`<div class="avatar">${esc((p.name||'?')[0])}</div>`;editPhoto.value='';editorOverlay.classList.add('show')}
+function closeEditor(){editorOverlay.classList.remove('show');editingIndex=-1;editingPhoto=''}
+editPhoto.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{editingPhoto=r.result;editAvatar.innerHTML=`<img class="avatar" src="${editingPhoto}">`};r.readAsDataURL(f)};
+function savePlayerEdit(){if(editingIndex<0)return;const n=editName.value.trim();if(!n){toast('Digite o nome do jogador');return}players[editingIndex].name=n;players[editingIndex].rating=+editRating.value;players[editingIndex].pos=editPos.value;players[editingIndex].photo=editingPhoto;save();renderPlayers();renderPresence();closeEditor();toast('Jogador atualizado!')}
+
+async function toggleScoreFullscreen(){const score=document.getElementById('score');if(!document.fullscreenElement){try{await score.requestFullscreen()}catch(e){}document.body.classList.add('fullscreen-score');score.classList.add('fullscreen-mode')}else{try{await document.exitFullscreen()}catch(e){}document.body.classList.remove('fullscreen-score');score.classList.remove('fullscreen-mode')}}
+document.addEventListener('fullscreenchange',()=>{const active=!!document.fullscreenElement;document.body.classList.toggle('fullscreen-score',active);document.getElementById('score').classList.toggle('fullscreen-mode',active)});
 function point(side,v){if(side==='a')A=Math.max(0,A+v);else B=Math.max(0,B+v);aScore.textContent=A;bScore.textContent=B}
 function finishSet(){if(A===B){toast('O set não pode terminar empatado');return}sets.push([A,B]);setsEl();A=0;B=0;aScore.textContent=0;bScore.textContent=0}
-function setsEl(){sets.innerHTML=sets.length?sets.map((s,i)=>`<div class="set"><b>SET ${i+1}</b><br>🍺 ${s[0]} × ${s[1]} 🍻</div>`).join(''):'<div class="muted">Nenhum set finalizado.</div>'}
-function newGame(){A=B=0;sets=[];aScore.textContent=bScore.textContent=0;setsEl()}
-function finishGame(){let h=JSON.parse(localStorage.getItem(HKEY)||'[]');h.unshift({date:new Date().toLocaleString('pt-BR'),sets:[...sets]});localStorage.setItem(HKEY,JSON.stringify(h));toast('Jogo salvo no histórico')}
-function renderHistory(){let h=JSON.parse(localStorage.getItem(HKEY)||'[]');hist.innerHTML=h.length?h.map((x,i)=>`<div class="card"><b>🏐 ${x.date}</b><div class="setlist" style="margin-top:8px">${x.sets.map((s,j)=>`<div class="set">SET ${j+1}<br><b>${s[0]} × ${s[1]}</b></div>`).join('')}</div></div>`).join(''):'<div class="muted">Nenhuma partida registrada ainda.</div>'}
+function setsEl(){setsElCache=sets.length?sets.map((s,i)=>`<div class="set"><b>SET ${i+1}</b><br>${esc(matchMeta?.teamA||'TIME A')} ${s[0]} × ${s[1]} ${esc(matchMeta?.teamB||'TIME B')}</div>`).join(''):'<div class="muted">Nenhum set finalizado.</div>';document.getElementById('sets').innerHTML=setsElCache}
+function newGame(){A=B=0;sets=[];aScore.textContent=bScore.textContent=0;setsEl();renderMatchStats()}
+function finishGame(){if(!sets.length){toast('Finalize pelo menos um set antes de salvar');return}const winsA=sets.filter(s=>s[0]>s[1]).length,winsB=sets.filter(s=>s[1]>s[0]).length;if(winsA===winsB){toast('Não foi possível definir o vencedor');return}let h=JSON.parse(localStorage.getItem(HKEY)||'[]');const date=matchMeta?.date||localISO();const entryStats=Object.entries(matchStats||{}).map(([playerId,stats])=>{const p=players.find(x=>String(x.id)===String(playerId));const inA=matchMeta&&currentTeams[matchMeta.teamAIndex]?.players.some(id=>String(id)===String(playerId));const inB=matchMeta&&currentTeams[matchMeta.teamBIndex]?.players.some(id=>String(id)===String(playerId));return {playerId,name:p?.name||stats.name||'Jogador',team:inA?(matchMeta.teamA||'TIME A'):(inB?(matchMeta.teamB||'TIME B'):'Equipe'),stats:{...stats},total:STAT_DEFS.reduce((n,[k])=>n+(+stats[k]||0),0)}}).filter(x=>x.total>0||players.some(p=>String(p.id)===String(x.playerId)));const entry={id:Date.now(),date,teamA:matchMeta?.teamA||'TIME A',teamB:matchMeta?.teamB||'TIME B',sets:[...sets],winner:winsA>winsB?(matchMeta?.teamA||'TIME A'):(matchMeta?.teamB||'TIME B'),playerStats:entryStats};h.unshift(entry);localStorage.setItem(HKEY,JSON.stringify(h));matchStats={};localStorage.removeItem('cnr_match_stats');renderHistory();toast('Partida e estatísticas salvas!');show('history')}
+function renderMatchStats(){const box=document.getElementById('matchStatsView');if(!box)return;if(!matchMeta||!currentTeams.length){box.innerHTML='<div class="muted">Inicie uma partida para registrar as estatísticas dos jogadores.</div>';return}const teamIndexes=[matchMeta.teamAIndex,matchMeta.teamBIndex];box.innerHTML=teamIndexes.map((ti,ix)=>{const team=currentTeams[ti];if(!team)return '';const members=team.players.map(id=>players.find(p=>String(p.id)===String(id))).filter(Boolean);return `<div class="stat-team"><h3>${esc(team.name)}</h3>${members.length?members.map(p=>{if(!matchStats[p.id])matchStats[p.id]={};return `<div class="stat-player"><div class="stat-player-name">${esc(p.name)}</div><div class="stat-grid">${STAT_DEFS.map(([k,label])=>{const v=+(matchStats[p.id]?.[k]||0);return `<div class="stat-item"><span>${label}</span><button onclick="changeStat('${p.id}','${k}',-1)">−</button><b>${v}</b><button onclick="changeStat('${p.id}','${k}',1)">+</button></div>`}).join('')}</div><div class="stat-total">Total de ações: ${STAT_DEFS.reduce((n,[k])=>n+(+(matchStats[p.id]?.[k]||0)),0)}</div></div>`}).join(''):'<div class="muted">Nenhum jogador nesta equipe.</div>'}</div>`}).join('');localStorage.setItem('cnr_match_stats',JSON.stringify(matchStats))}function changeStat(pid,key,delta){if(!matchStats[pid])matchStats[pid]={};matchStats[pid][key]=Math.max(0,(+matchStats[pid][key]||0)+delta);localStorage.setItem('cnr_match_stats',JSON.stringify(matchStats));renderMatchStats()}function resetMatchStats(){if(confirm('Zerar todas as estatísticas desta partida?')){matchStats={};localStorage.setItem('cnr_match_stats','{}');renderMatchStats();toast('Estatísticas zeradas')}}
+
+function clearHistory(){if(confirm('Apagar todo o histórico de partidas e o ranking?')){localStorage.removeItem(HKEY);renderHistory()}}
+function filteredHistory(){let h=JSON.parse(localStorage.getItem(HKEY)||'[]');const from=document.getElementById('rankFrom')?.value||'',to=document.getElementById('rankTo')?.value||'';return h.filter(x=>(!from||String(x.date)>=from)&&(!to||String(x.date)<=to))}
+function setPlayerRankMode(mode){playerRankMode=mode;document.querySelectorAll('#playerRankTabs button').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));renderHistory()}
+function renderPlayerHighlights(totals){const box=document.getElementById('playerHighlights');if(!box)return;const arr=Object.values(totals);if(!arr.length){box.innerHTML='';return}const labelByKey=Object.fromEntries(STAT_DEFS.map(([k,l])=>[k,l]));const cards=[];const overall=[...arr].sort((a,b)=>b.total-a.total||a.name.localeCompare(b.name,'pt-BR'))[0];if(overall)cards.push(`<div class="rank-highlight"><b>⭐ Mais completo</b><strong>${esc(overall.name)}</strong><span>${overall.total} ações • ${overall.categories} fundamentos</span></div>`);STAT_DEFS.slice(0,7).forEach(([k,label])=>{const top=[...arr].sort((a,b)=>(b.stats[k]||0)-(a.stats[k]||0)||a.name.localeCompare(b.name,'pt-BR'))[0];if(top&&(top.stats[k]||0)>0)cards.push(`<div class="rank-highlight"><b>${esc(label)}</b><strong>${esc(top.name)}</strong><span>${top.stats[k]||0} registro${(top.stats[k]||0)===1?'':'s'}</span></div>`)});box.innerHTML=cards.slice(0,8).join('')}
+function renderHistory(){let h=filteredHistory();let wins={};h.forEach(x=>{if(x.winner)wins[x.winner]=(wins[x.winner]||0)+1});const rows=Object.entries(wins).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'pt-BR')).map(([name,w],i)=>`<tr><td>${i+1}</td><td><b>${esc(name)}</b></td><td>${w}</td></tr>`).join('');ranking.innerHTML=rows?`<table class="rank-table"><thead><tr><th>#</th><th>Equipe</th><th>Vitórias</th></tr></thead><tbody>${rows}</tbody></table>`:'<div class="muted">Nenhuma vitória no período selecionado.</div>';const totals={};h.forEach(x=>(x.playerStats||[]).forEach(ps=>{const key=String(ps.playerId||ps.name);if(!totals[key])totals[key]={name:ps.name||'Jogador',matches:0,total:0,stats:{},categories:0};totals[key].matches++;STAT_DEFS.forEach(([k])=>{totals[key].stats[k]=(totals[key].stats[k]||0)+(+ps.stats?.[k]||0)});totals[key].total+=+ps.total||0}));Object.values(totals).forEach(p=>p.categories=STAT_DEFS.reduce((n,[k])=>n+((p.stats[k]||0)>0?1:0),0));renderPlayerHighlights(totals);const mode=playerRankMode;const modeLabel=mode==='total'?'Total de ações':(STAT_DEFS.find(x=>x[0]===mode)?.[1]||'Total');const pr=Object.values(totals).sort((a,b)=>{const av=mode==='total'?a.total:a.stats[mode]||0;const bv=mode==='total'?b.total:b.stats[mode]||0;return bv-av||b.total-a.total||a.name.localeCompare(b.name,'pt-BR')}).map((p,i)=>`<tr><td>${i+1}</td><td><b>${esc(p.name)}</b></td><td>${p.matches}</td>${STAT_DEFS.map(([k])=>`<td>${p.stats[k]||0}</td>`).join('')}<td><b>${p.total}</b></td></tr>`).join('');const playerRank=document.getElementById('playerRanking');if(playerRank)playerRank.innerHTML=pr?`<div class="muted" style="margin-bottom:5px">Ordenado por: <b>${esc(modeLabel)}</b></div><div style="overflow:auto"><table class="rank-table"><thead><tr><th>#</th><th>Jogador</th><th>Part.</th>${STAT_DEFS.map(([,l])=>`<th>${l}</th>`).join('')}<th>Total</th></tr></thead><tbody>${pr}</tbody></table></div>`:'<div class="muted">Nenhuma estatística registrada no período.</div>';hist.innerHTML=h.length?h.map(x=>{const ps=x.playerStats||[];const psRows=ps.length?ps.slice().sort((a,b)=>(b.total||0)-(a.total||0)).map((p,i)=>`<tr><td>${i+1}</td><td>${esc(p.name)}</td><td>${esc(p.team||'')}</td>${STAT_DEFS.map(([k])=>`<td>${+(p.stats?.[k]||0)}</td>`).join('')}<td><b>${+(p.total||0)}</b></td></tr>`).join(''):'';return `<div class="card"><div style="display:flex;justify-content:space-between;gap:8px"><b>🏐 ${fmtDate(x.date)}</b><span class="muted">Vencedor: ${esc(x.winner||'—')}</span></div><div style="margin-top:7px"><b>${esc(x.teamA||'TIME A')}</b> × <b>${esc(x.teamB||'TIME B')}</b></div><div class="setlist" style="margin-top:8px">${(x.sets||[]).map((s,j)=>`<div class="set">SET ${j+1}<br><b>${s[0]} × ${s[1]}</b></div>`).join('')}</div>${psRows?`<div style="overflow:auto;margin-top:10px"><table class="rank-table"><thead><tr><th>#</th><th>Jogador</th><th>Equipe</th>${STAT_DEFS.map(([,l])=>`<th>${l}</th>`).join('')}<th>Total</th></tr></thead><tbody>${psRows}</tbody></table></div>`:'<div class="muted" style="margin-top:8px">Sem estatísticas registradas nesta partida.</div>'}</div>`}).join(''):'<div class="muted">Nenhuma partida registrada ainda.</div>'}
+function createTournament(){if(currentTeams.length<2){toast('Faça o sorteio dos times primeiro');return}const name=(tourName.value||'Torneio Cerveja na Rede').trim();const date=tourDate.value||localISO();const format=tourFormat.value;const teams=currentTeams.map(t=>({id:t.id,name:t.name,wins:0,losses:0}));let matches=[];if(format==='roundrobin'){for(let i=0;i<teams.length;i++)for(let j=i+1;j<teams.length;j++)matches.push({id:`m${Date.now()}_${i}_${j}`,a:teams[i].id,b:teams[j].id,winner:null})}else{for(let i=0;i<teams.length-1;i+=2)matches.push({id:`m${Date.now()}_${i}`,a:teams[i].id,b:teams[i+1].id,winner:null});if(teams.length%2)matches.push({id:`m${Date.now()}_bye`,a:teams[teams.length-1].id,b:null,winner:teams[teams.length-1].id})}const t={id:Date.now(),name,date,format,teams,matches};tournaments.unshift(t);localStorage.setItem(TKEY,JSON.stringify(tournaments));renderTournament();toast('Torneio criado!')}
+function saveTournament(){localStorage.setItem(TKEY,JSON.stringify(tournaments))}
+function recordTournamentWinner(tid,mid,winner){const t=tournaments.find(x=>x.id===tid);if(!t)return;const m=t.matches.find(x=>x.id===mid);if(!m||!winner)return;const previous=m.winner;if(previous){const old=t.teams.find(x=>x.id===previous);if(old)old.wins=Math.max(0,old.wins-1)}if(previous===winner){m.winner=null}else{m.winner=winner;const w=t.teams.find(x=>x.id===winner);if(w)w.wins++}t.teams.forEach(x=>x.losses=0);t.matches.forEach(x=>{if(x.winner&&x.b){const l=t.teams.find(q=>q.id===(x.winner===x.a?x.b:x.a));if(l)l.losses++}});saveTournament();renderTournament();toast('Resultado do torneio atualizado')}
+function renderTournament(){const tv=document.getElementById('tournamentView');if(!tv)return;const t=tournaments[0];if(!t){tv.innerHTML='<div class="muted">Nenhum torneio criado ainda. Crie um usando os times sorteados.</div>';if(document.getElementById('tourDate'))tourDate.value=localISO();return}const teamMap=Object.fromEntries(t.teams.map(x=>[x.id,x]));const standings=[...t.teams].sort((a,b)=>b.wins-a.wins||a.name.localeCompare(b.name,'pt-BR'));const rows=standings.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.name)}</td><td>${x.wins}</td><td>${x.losses}</td></tr>`).join('');const matches=t.matches.map(m=>{const a=teamMap[m.a]?.name||'Equipe';const b=m.b?teamMap[m.b]?.name||'Equipe':'Folga';return `<div class="tmatch"><select onchange="recordTournamentWinner(${t.id},'${m.id}',this.value)"><option value="">${m.winner?'Resultado registrado':'Escolher vencedor'}</option><option value="${m.a}" ${m.winner===m.a?'selected':''}>${esc(a)}</option>${m.b?`<option value="${m.b}" ${m.winner===m.b?'selected':''}>${esc(b)}</option>`:'<option value="'+m.a+'">'+esc(a)+' (folga)</option>'}</select><span>×</span><div>${esc(a)} ${m.b?'× '+esc(b):'— folga'}</div><span class="done">${m.winner?'✓':''}</span></div>`}).join('');tv.innerHTML=`<div class="section-title"><div><b>${esc(t.name)}</b><div class="muted">${fmtDate(t.date)} • ${t.format==='roundrobin'?'Todos contra todos':'Mata-mata'}</div></div></div><h3 style="font-size:12px">Classificação</h3><table class="rank-table"><thead><tr><th>#</th><th>Equipe</th><th>V</th><th>D</th></tr></thead><tbody>${rows}</tbody></table><h3 style="font-size:12px;margin-top:14px">Partidas</h3>${matches}`;tourDate.value=t.date}
+
 function toast(s){let t=document.getElementById('toast');t.textContent=s;t.style.display='block';setTimeout(()=>t.style.display='none',1800)}
-renderPlayers();renderPresence();setsEl();
 
-
-document.querySelectorAll('.bottomnav button').forEach(b=>{
-  b.onclick=()=>{
-    if(b===document.querySelector('.bottomnav button:nth-child(3)')){
-      show('home');
-      setTimeout(()=>document.getElementById('nTeams').scrollIntoView({behavior:'smooth'}),50);
-    }else{
-      show(b.dataset.s);
-    }
-    document.querySelectorAll('.bottomnav button').forEach(x=>x.classList.remove('active'));
-    b.classList.add('active');
-  };
-});
+// Compatibilidade com histórico antigo: registros antigos continuam visíveis.
+renderPlayers();renderPresence();setsEl();renderTeams();populateMatchTeams();renderHistory();renderTournament();
+if(document.getElementById('matchDate'))document.getElementById('matchDate').value=matchMeta?.date||localISO();
+if(document.getElementById('tourDate'))document.getElementById('tourDate').value=tournaments[0]?.date||localISO();
 
 </script>
 <script>

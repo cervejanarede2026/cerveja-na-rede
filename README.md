@@ -1,7 +1,14 @@
-# Cerveja na Rede — Visual Exato V4
+# Cerveja na Rede — V7
 
-Atualizações desta versão:
-- Logo oficial fornecido pelo usuário incorporado como `logo.png`.
-- Botão **← Início** nas telas de Jogadores, Placar e Histórico.
-- O botão de início encerra o modo tela inteira do placar, quando necessário, e retorna ao topo.
-- Mantidas as funções anteriores: edição de estrelas, troca de foto e placar em tela inteira.
+Versão com ranking avançado de jogadores.
+
+## Novidades
+- Ranking geral de jogadores.
+- Abas por fundamento: Ataque, Defesa, Bloqueio, Ace, Passe, Saque e Levantamento.
+- Destaques automáticos: jogador mais completo e líder de cada fundamento.
+- Filtro por período continua valendo para os rankings.
+- Histórico de cada partida continua mostrando as estatísticas individuais.
+- Registro de estatísticas durante a partida com + e −.
+
+## Publicação
+Substitua os arquivos do repositório GitHub Pages pelos arquivos desta pasta, mantendo `index.html`, `logo.png`, `manifest.json` e `sw.js` na raiz.
