@@ -17,10 +17,16 @@ Esta versão mantém todos os recursos anteriores e adiciona **grupo online comp
 1. Crie um projeto gratuito no Supabase.
 2. Em **Authentication → Providers**, ative **Anonymous sign-ins**.
 3. Abra **SQL Editor** e execute o arquivo `SUPABASE_SETUP.sql`.
-4. O arquivo já deixa `public.group_state` habilitado no Realtime, se ainda não estiver.
-5. Esta versão já vem configurada com o Project URL e a chave **Publishable** do projeto.
-6. Abra **☁️ Grupo online**, crie um grupo e passe o código para as outras pessoas.
+4. Em **Database → Replication**, adicione `public.group_state` à publicação `supabase_realtime`.
+5. No Cerveja na Rede, toque em **☁️ Grupo online → ⚙️** e informe:
+   - Project URL
+   - chave **anon/public**
 
-A chave Publishable pode ficar no aplicativo do navegador; ela é feita para uso em componentes públicos. **Nunca coloque a chave Secret/service_role no aplicativo.**
+**Nunca coloque a chave `service_role` no aplicativo.**
 
-Todos os celulares que entrarem pelo mesmo código verão os mesmos dados.
+Depois disso, crie um grupo e passe o código para as outras pessoas. Todos os celulares que entrarem pelo mesmo código verão os mesmos dados.
+
+
+## V11 — correção do acesso online
+
+A V11 corrige a autenticação anônima do Supabase: o aplicativo agora confirma a sessão antes de criar/entrar em um grupo, mostra o erro real de conexão e inclui o botão **Testar conexão**. O Service Worker também foi atualizado para a V11.
