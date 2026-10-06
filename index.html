@@ -326,6 +326,34 @@ function cloudCfg(){
 function cloudReady(){const c=cloudCfg();return !!(c?.url&&c?.key&&window.supabase?.createClient)}
 function cloudInputCode(){return normalizeCode(document.getElementById('cloudGroupCode')?.value||'')}
 function cloudInputName(){return String(document.getElementById('cloudGroupName')?.value||'Cerveja na Rede').trim()}
+function cloudSnapshot(){
+  const state={};
+  CLOUD_KEYS.forEach(k=>{state[k]=localStorage.getItem(k)});
+  return state;
+}
+function cloudSetSnapshot(state){
+  if(!state||typeof state!=='object')return;
+  cloudApplying=true;
+  try{
+    CLOUD_KEYS.forEach(k=>{
+      const v=Object.prototype.hasOwnProperty.call(state,k)?state[k]:null;
+      if(v===null||typeof v==='undefined')localStorage.removeItem(k);
+      else localStorage.setItem(k,String(v));
+    });
+    players=JSON.parse(localStorage.getItem(PKEY)||'[]');
+    currentTeams=JSON.parse(localStorage.getItem('cnr_current_teams')||'null')||[];
+    matchMeta=JSON.parse(localStorage.getItem('cnr_match_meta')||'null')||null;
+    tournaments=JSON.parse(localStorage.getItem(TKEY)||'[]');
+    matchStats=JSON.parse(localStorage.getItem('cnr_match_stats')||'{}');
+    if(typeof renderPlayers==='function')renderPlayers();
+    if(typeof renderPresence==='function')renderPresence();
+    if(typeof renderTeams==='function'&&currentTeams.length)renderTeams();
+    if(typeof renderHistory==='function')renderHistory();
+    if(typeof renderTournament==='function')renderTournament();
+    if(typeof renderMatchStats==='function')renderMatchStats();
+  }catch(e){console.warn('Cloud snapshot:',e)}
+  finally{cloudApplying=false}
+}
 async function initCloudClient(){
   const c=cloudCfg();
   if(!c?.url||!c?.key)throw new Error('Configuração do Supabase ausente.');
