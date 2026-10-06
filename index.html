@@ -384,13 +384,13 @@ async function migrateLegacyData(){
   let localPlayers=[];
   try{localPlayers=JSON.parse(localStorage.getItem(PKEY)||'[]')}catch(e){}
   let oldPlayers=[];
-  try{oldPlayers=legacy?.[PKEY]?JSON.parse(legacy[PKEY]):[]}catch(e){}
+  try{const legacyPlayers=legacy?.[PKEY];oldPlayers=Array.isArray(legacyPlayers)?legacyPlayers:(typeof legacyPlayers==='string'?(JSON.parse(legacyPlayers)||[]):[])}catch(e){oldPlayers=[]}
   const merged=new Map();
   for(const p of(oldPlayers||[]))merged.set(String(p.id),p);
   for(const p of(localPlayers||[]))if(!merged.has(String(p.id)))merged.set(String(p.id),p);
   const rows=[...merged.entries()].map(([id,data])=>({id,data,updated_at:new Date().toISOString(),updated_by:null}));
   if(rows.length){const {error}=await cloudClient.from('fixed_players').upsert(rows,{onConflict:'id'});if(error)throw error;cloudPlayerCache=new Map(rows.map(r=>[String(r.id),r.data]));cloudApplying=true;localStorage.setItem(PKEY,JSON.stringify(rows.map(r=>r.data)));cloudApplying=false}
-  for(const k of FIXED_STATE_KEYS){let val=null;try{val=legacy?.[k]?JSON.parse(legacy[k]):JSON.parse(localStorage.getItem(k)||'null')}catch(e){}if(val!==null&&typeof val!=='undefined'){await cloudClient.from('fixed_state').upsert({key:k,state:val,updated_at:new Date().toISOString(),updated_by:null},{onConflict:'key'});cloudApplying=true;localStorage.setItem(k,JSON.stringify(val));cloudApplying=false}}
+  for(const k of FIXED_STATE_KEYS){let val=null;try{const legacyVal=legacy?.[k];if(legacyVal!==null&&typeof legacyVal!=='undefined'){val=typeof legacyVal==='string'?JSON.parse(legacyVal):legacyVal}else{const localVal=localStorage.getItem(k);val=localVal?JSON.parse(localVal):null}}catch(e){val=null}if(val!==null&&typeof val!=='undefined'){await cloudClient.from('fixed_state').upsert({key:k,state:val,updated_at:new Date().toISOString(),updated_by:null},{onConflict:'key'});cloudApplying=true;localStorage.setItem(k,JSON.stringify(val));cloudApplying=false}}
 }
 
 async function syncPlayers(){
