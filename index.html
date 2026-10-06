@@ -249,7 +249,7 @@ const STAT_DEFS=[['attack','Ataque'],['defense','Defesa'],['block','Bloqueio'],[
 let matchStats=safeJSON(localStorage.getItem('cnr_match_stats')||'{}',{});
 let playerRankMode='total';
 
-function save(){localStorage.setItem(PKEY,JSON.stringify(players));if(!cloudApplying)players.forEach(p=>cloudDirtyPlayers.add(String(p.id)))}
+function save(){localStorage.setItem(PKEY,JSON.stringify(players));if(!cloudApplying){const now=new Map((Array.isArray(players)?players:[]).map(p=>[String(p.id),p]));for(const [id,p] of now){if(JSON.stringify(cloudPlayerCache.get(id))!==JSON.stringify(p))cloudDirtyPlayers.add(id)}for(const id of cloudPlayerCache.keys()){if(!now.has(id))cloudDirtyPlayers.add(id)}}}
 function stars(n){return '⭐'.repeat(n)+'☆'.repeat(5-n)}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function localISO(){const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)}
@@ -329,7 +329,7 @@ if(document.getElementById('tourDate'))document.getElementById('tourDate').value
 const FIXED_STATE_KEYS=['cnr_hist','cnr_tournaments','cnr_current_teams','cnr_match_meta','cnr_match_stats'];
 const DEFAULT_CLOUD_CONFIG={url:'https://sewbzgmpkindoftynkqp.supabase.co',key:'sb_publishable_PvY7Ctn-qr2Pu6kWLd5hww_EQH7USYU'};
 let cloudClient=null, cloudGroupId='', cloudGroupCode='CRN-1556', cloudPlayersChannel=null, cloudStateChannel=null;
-let cloudBusy=false, cloudApplying=false, cloudAuthPromise=null, cloudStateTimers={}, cloudPlayerCache=new Map();
+let cloudBusy=false, cloudApplying=false, cloudAuthPromise=null, cloudStateTimers={}, cloudPlayerCache=new Map(), cloudDirtyPlayers=new Set();
 
 function cloudCfg(){return DEFAULT_CLOUD_CONFIG}
 function cloudReady(){const c=cloudCfg();return !!(c?.url&&c?.key&&window.supabase?.createClient)}
