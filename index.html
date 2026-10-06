@@ -230,6 +230,14 @@ body.fullscreen-score main{max-width:none;width:100%;padding:0}
 <div id="toast" class="toast"></div>
 
 <script>
+function safeJSON(v,fallback=null){
+  if(v===null||typeof v==='undefined'||v==='')return fallback;
+  if(typeof v==='string'){
+    try{return JSON.parse(v)}catch(e){return fallback}
+  }
+  return v;
+}
+
 
 const PKEY='cnr_players_final', HKEY='cnr_hist', TKEY='cnr_tournaments';
 let players=safeJSON(localStorage.getItem(PKEY)||'[]',[]);
@@ -453,5 +461,5 @@ window.addEventListener('load',()=>setTimeout(initCloud,400));
 
 </script>
 </body>
-</html>function safeJSON(v,fallback=null){if(v===null||typeof v==='undefined'||v==='')return fallback;if(typeof v==='string'){try{return JSON.parse(v)}catch(e){return fallback}}return v}
+</html>
 
