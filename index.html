@@ -233,18 +233,18 @@ body.fullscreen-score main{max-width:none;width:100%;padding:0}
 function safeJSON(v,fallback=null){
   if(v===null||typeof v==='undefined'||v==='')return fallback;
   if(typeof v==='string'){
-    try{return JSON.parse(v)}catch(e){return fallback}
+    try{const parsed=JSON.parse(v);return parsed===null?fallback:parsed}catch(e){return fallback}
   }
-  return v;
+  return v===null?fallback:v;
 }
 
 
 const PKEY='cnr_players_final', HKEY='cnr_hist', TKEY='cnr_tournaments';
-let players=safeJSON(localStorage.getItem(PKEY)||'[]',[]);
+let players=(()=>{const v=safeJSON(localStorage.getItem(PKEY)||'[]',[]);return Array.isArray(v)?v:[]})();
 let selectedPhoto='', A=0,B=0,sets=[];
 let currentTeams=safeJSON(localStorage.getItem('cnr_current_teams')||'null',[])||[];
 let matchMeta=safeJSON(localStorage.getItem('cnr_match_meta')||'null',null)||null;
-let tournaments=safeJSON(localStorage.getItem(TKEY)||'[]',[]);
+let tournaments=(()=>{const v=safeJSON(localStorage.getItem(TKEY)||'[]',[]);return Array.isArray(v)?v:[]})();
 const STAT_DEFS=[['attack','Ataque'],['defense','Defesa'],['block','Bloqueio'],['ace','Ace'],['perfectPass','Passe perfeito'],['serveWinner','Saque vencedor'],['assist','Levantamento decisivo']];
 let matchStats=safeJSON(localStorage.getItem('cnr_match_stats')||'{}',{});
 let playerRankMode='total';
@@ -352,10 +352,10 @@ async function fixedGroup(){
 }
 
 function renderAllFromCloud(){
-  players=safeJSON(localStorage.getItem(PKEY)||'[]',[]);
+  {const v=safeJSON(localStorage.getItem(PKEY)||'[]',[]);players=Array.isArray(v)?v:[];}
   currentTeams=safeJSON(localStorage.getItem('cnr_current_teams')||'null',[])||[];
   matchMeta=safeJSON(localStorage.getItem('cnr_match_meta')||'null',null)||null;
-  tournaments=safeJSON(localStorage.getItem(TKEY)||'[]',[]);
+  {const v=safeJSON(localStorage.getItem(TKEY)||'[]',[]);tournaments=Array.isArray(v)?v:[];}
   matchStats=safeJSON(localStorage.getItem('cnr_match_stats')||'{}',{});
   if(typeof renderPlayers==='function')renderPlayers();
   if(typeof renderPresence==='function')renderPresence();
