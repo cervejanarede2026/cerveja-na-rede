@@ -428,20 +428,84 @@ function scheduleFixedState(key){
   },250);
 }
 
+let cloudPollTimer=null;
+let cloudRefreshing=false;
+let cloudLastRemoteRefresh=0;
+
+async function refreshFixedFromServer(){
+  if(cloudRefreshing||cloudApplying||!cloudClient||!cloudGroupId)return;
+  cloudRefreshing=true;
+  try{
+    await ensureCloudAuth();
+    const [{data:prs,error:pe},{data:sts,error:se}]=await Promise.all([
+      cloudClient.from('fixed_players').select('id,data,updated_at'),
+      cloudClient.from('fixed_state').select('key,state,updated_at')
+    ]);
+    if(pe)throw pe;if(se)throw se;
+    const remotePlayers=new Map((prs||[]).map(r=>[String(r.id),r.data]).filter(([id,data])=>id&&data));
+    const localPlayers=[...cloudPlayerCache.values()].filter(Boolean);
+    const remoteSignature=JSON.stringify([...remotePlayers.entries()].sort((a,b)=>a[0].localeCompare(b[0])));
+    const localSignature=JSON.stringify([...cloudPlayerCache.entries()].sort((a,b)=>a[0].localeCompare(b[0])));
+    let changed=remoteSignature!==localSignature;
+    if(changed){
+      cloudPlayerCache=remotePlayers;
+      cloudApplying=true;
+      localStorage.setItem(PKEY,JSON.stringify([...remotePlayers.values()]));
+      cloudApplying=false;
+    }
+    const remoteState=new Map((sts||[]).map(r=>[String(r.key),r.state]));
+    for(const key of FIXED_STATE_KEYS){
+      if(!remoteState.has(key))continue;
+      const remoteValue=remoteState.get(key);
+      const localValue=safeJSON(localStorage.getItem(key)||'null',null);
+      if(JSON.stringify(remoteValue)!==JSON.stringify(localValue)){
+        cloudApplying=true;
+        localStorage.setItem(key,JSON.stringify(remoteValue));
+        cloudApplying=false;
+        changed=true;
+      }
+    }
+    if(changed)renderAllFromCloud();
+    cloudLastRemoteRefresh=Date.now();
+    updateCloudUI();
+  }catch(e){
+    console.warn('refreshFixedFromServer:',e);
+    updateCloudUI('⚠️ '+cloudErrorMessage(e,'Falha ao atualizar dados'));
+  }finally{cloudRefreshing=false}
+}
+
+function startCloudPolling(){
+  clearInterval(cloudPollTimer);
+  cloudPollTimer=setInterval(()=>refreshFixedFromServer(),3000);
+}
+
 function subscribeFixed(){
   if(cloudPlayersChannel)cloudClient.removeChannel(cloudPlayersChannel);
   if(cloudStateChannel)cloudClient.removeChannel(cloudStateChannel);
-  cloudPlayersChannel=cloudClient.channel('cnr-v16-fixed-players').on('postgres_changes',{event:'*',schema:'public',table:'fixed_players'},payload=>{
-    if(cloudApplying)return;
-    if(payload.eventType==='DELETE'){cloudPlayerCache.delete(String(payload.old.id));cloudApplying=true;localStorage.setItem(PKEY,JSON.stringify([...cloudPlayerCache.values()]));cloudApplying=false}
-    else if(payload.new){cloudPlayerCache.set(String(payload.new.id),payload.new.data);cloudApplying=true;localStorage.setItem(PKEY,JSON.stringify([...cloudPlayerCache.values()]));cloudApplying=false}
-    renderAllFromCloud();
-  }).subscribe();
-  cloudStateChannel=cloudClient.channel('cnr-v16-fixed-state').on('postgres_changes',{event:'*',schema:'public',table:'fixed_state'},payload=>{
-    if(cloudApplying||!payload.new?.key)return;
-    const key=String(payload.new.key);if(!FIXED_STATE_KEYS.includes(key))return;
-    cloudApplying=true;localStorage.setItem(key,JSON.stringify(payload.new.state));cloudApplying=false;renderAllFromCloud();
-  }).subscribe();
+
+  cloudPlayersChannel=cloudClient.channel('cnr-v19-fixed-players')
+    .on('postgres_changes',{event:'*',schema:'public',table:'fixed_players'},()=>{
+      refreshFixedFromServer();
+    })
+    .subscribe((status,err)=>{
+      console.log('Realtime fixed_players:',status,err||'');
+      if(status==='SUBSCRIBED')updateCloudUI();
+      else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED')
+        updateCloudUI('⚠️ Realtime instável — sincronização automática ativa');
+    });
+
+  cloudStateChannel=cloudClient.channel('cnr-v19-fixed-state')
+    .on('postgres_changes',{event:'*',schema:'public',table:'fixed_state'},()=>{
+      refreshFixedFromServer();
+    })
+    .subscribe((status,err)=>{
+      console.log('Realtime fixed_state:',status,err||'');
+      if(status==='SUBSCRIBED')updateCloudUI();
+      else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED')
+        updateCloudUI('⚠️ Realtime instável — sincronização automática ativa');
+    });
+
+  startCloudPolling();
 }
 function updateCloudUI(err){const st=document.getElementById('cloudStatus'),info=document.getElementById('cloudInfo');if(!st)return;if(err){st.textContent=err;info.textContent='Os dados locais continuam preservados.';return}if(cloudGroupId){st.textContent='🟢 ONLINE • Grupo fixo';info.textContent='Todos os celulares usam o mesmo grupo automaticamente.'}else{st.textContent='🔄 Conectando...';info.textContent='Conectando ao grupo online fixo.'}}
 
