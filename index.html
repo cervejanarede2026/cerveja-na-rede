@@ -242,6 +242,7 @@ function safeJSON(v,fallback=null){
 // Variáveis de sincronização declaradas antes de qualquer função que possa ser executada.
 var cloudApplying=false, cloudPlayerCache=new Map(), cloudDirtyPlayers=new Set();
 const PKEY='cnr_players_final', HKEY='cnr_hist', TKEY='cnr_tournaments';
+const PHOTO_BUCKET='player-photos';
 let players=(()=>{const v=safeJSON(localStorage.getItem(PKEY)||'[]',[]);return Array.isArray(v)?v:[]})();
 let selectedPhoto='', A=0,B=0,sets=[];
 let currentTeams=safeJSON(localStorage.getItem('cnr_current_teams')||'null',[])||[];
@@ -259,6 +260,18 @@ function fmtDate(v){if(!v)return '—';const m=String(v).match(/^(\\d{4})-(\\d{2
 function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');if(id==='players')renderPlayers();if(id==='history')renderHistory();if(id==='home')renderPresence();if(id==='tournament')renderTournament();window.scrollTo(0,0)}
 document.querySelectorAll('.bottomnav button').forEach(b=>b.onclick=()=>{if(b.dataset.s==='home'&&b.textContent.includes('Sorteio')){show('home');setTimeout(()=>document.getElementById('nTeams').scrollIntoView({behavior:'smooth'}),50)}else show(b.dataset.s)});
 
+async function uploadPlayerPhoto(file, playerId){
+  if(!file) return '';
+  await ensureCloudAuth();
+  const prepared=await preparePlayerPhoto(file);
+  const path=`players/${String(playerId)}-${Date.now()}.jpg`;
+  const blob=await (await fetch(prepared)).blob();
+  const {error}=await cloudClient.storage.from(PHOTO_BUCKET).upload(path,blob,{contentType:'image/jpeg',upsert:false,cacheControl:'31536000'});
+  if(error) throw error;
+  const {data}=cloudClient.storage.from(PHOTO_BUCKET).getPublicUrl(path);
+  return data.publicUrl;
+}
+
 async function preparePlayerPhoto(file){
   if(!file)return '';
   return new Promise((resolve,reject)=>{
@@ -274,7 +287,7 @@ async function preparePlayerPhoto(file){
   });
 }
 
-async function addPlayer(){let n=document.getElementById('name').value.trim();if(!n){toast('Digite o nome do jogador');return}const btn=document.querySelector('#playerForm button[type=submit]');try{if(selectedPhotoFile){selectedPhoto=await preparePlayerPhoto(selectedPhotoFile)}players.push({id:Date.now()+Math.random(),name:n,rating:+rating.value,pos:pos.value,photo:selectedPhoto,present:true});save();name.value='';photo.value='';selectedPhoto='';selectedPhotoFile=null;renderPlayers();renderPresence();toast('Jogador adicionado!')}catch(e){toast('Não foi possível preparar a foto. Tente outra imagem.')}}
+async function addPlayer(){let n=document.getElementById('name').value.trim();if(!n){toast('Digite o nome do jogador');return}try{const id=Date.now()+Math.random();let photoUrl=selectedPhoto;if(selectedPhotoFile){photoUrl=cloudClient&&cloudGroupId?await uploadPlayerPhoto(selectedPhotoFile,id):await preparePlayerPhoto(selectedPhotoFile)}players.push({id,name:n,rating:+rating.value,pos:pos.value,photo:photoUrl,present:true});save();name.value='';photo.value='';selectedPhoto='';selectedPhotoFile=null;renderPlayers();renderPresence();toast('Jogador adicionado!')}catch(e){console.error(e);toast('Não foi possível salvar a foto. Verifique a conexão e tente novamente.')}}
 let selectedPhotoFile=null;
 photo.onchange=e=>{selectedPhotoFile=e.target.files[0]||null;if(selectedPhotoFile){preparePlayerPhoto(selectedPhotoFile).then(v=>selectedPhoto=v).catch(()=>selectedPhoto='')}}
 function removePlayer(i){players.splice(i,1);save();renderPlayers();renderPresence()}
@@ -295,9 +308,10 @@ function startMatch(){const ia=+matchTeamA.value,ib=+matchTeamB.value;if(ia===ib
 
 let editingIndex=-1,editingPhoto='';
 function editPlayer(i){const p=players[i];if(!p)return;editingIndex=i;editingPhoto=p.photo||'';editId.value=p.id;editName.value=p.name;editRating.value=p.rating;editPos.value=p.pos||'Coringa';editAvatar.innerHTML=p.photo?`<img class="avatar" src="${p.photo}">`:`<div class="avatar">${esc((p.name||'?')[0])}</div>`;editPhoto.value='';editorOverlay.classList.add('show')}
-function closeEditor(){editorOverlay.classList.remove('show');editingIndex=-1;editingPhoto=''}
-editPhoto.onchange=async e=>{const f=e.target.files[0];if(!f)return;try{editingPhoto=await preparePlayerPhoto(f);editAvatar.innerHTML=`<img class="avatar" src="${editingPhoto}">`}catch(err){toast('Não foi possível preparar a foto. Tente outra imagem.')}};
-function savePlayerEdit(){if(editingIndex<0)return;const n=editName.value.trim();if(!n){toast('Digite o nome do jogador');return}players[editingIndex].name=n;players[editingIndex].rating=+editRating.value;players[editingIndex].pos=editPos.value;players[editingIndex].photo=editingPhoto;save();renderPlayers();renderPresence();closeEditor();toast('Jogador atualizado!')}
+function closeEditor(){editorOverlay.classList.remove('show');editingIndex=-1;editingPhoto='';editingPhotoFile=null}
+let editingPhotoFile=null;
+editPhoto.onchange=async e=>{const f=e.target.files[0];if(!f)return;editingPhotoFile=f;try{const preview=await preparePlayerPhoto(f);editAvatar.innerHTML=`<img class="avatar" src="${preview}">`}catch(err){toast('Não foi possível preparar a foto. Tente outra imagem.')}};
+async function savePlayerEdit(){if(editingIndex<0)return;const n=editName.value.trim();if(!n){toast('Digite o nome do jogador');return}try{const p=players[editingIndex];p.name=n;p.rating=+editRating.value;p.pos=editPos.value;if(editingPhotoFile){p.photo=cloudClient&&cloudGroupId?await uploadPlayerPhoto(editingPhotoFile,p.id):await preparePlayerPhoto(editingPhotoFile)}save();renderPlayers();renderPresence();closeEditor();editingPhotoFile=null;toast('Jogador atualizado!')}catch(e){console.error(e);toast('Não foi possível salvar a foto. Verifique a conexão.')}}
 
 async function toggleScoreFullscreen(){const score=document.getElementById('score');if(!document.fullscreenElement){try{await score.requestFullscreen()}catch(e){}document.body.classList.add('fullscreen-score');score.classList.add('fullscreen-mode')}else{try{await document.exitFullscreen()}catch(e){}document.body.classList.remove('fullscreen-score');score.classList.remove('fullscreen-mode')}}
 document.addEventListener('fullscreenchange',()=>{const active=!!document.fullscreenElement;document.body.classList.toggle('fullscreen-score',active);document.getElementById('score').classList.toggle('fullscreen-mode',active)});
