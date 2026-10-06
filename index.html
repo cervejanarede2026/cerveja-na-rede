@@ -302,7 +302,7 @@ if(document.getElementById('tourDate'))document.getElementById('tourDate').value
 </script>
 <script>
 
-/* ===== CERVEJA NA REDE — SINCRONIZAÇÃO ONLINE V13 ===== */
+/* ===== CERVEJA NA REDE — SINCRONIZAÇÃO ONLINE V14 ===== */
 const CLOUD_KEYS=['cnr_players_final','cnr_hist','cnr_tournaments','cnr_current_teams','cnr_match_meta','cnr_match_stats'];
 const DEFAULT_CLOUD_CONFIG={url:'https://sewbzgmpkindoftynkqp.supabase.co',key:'sb_publishable_PvY7Ctn-qr2Pu6kWLd5hww_EQH7USYU'};
 let cloudClient=null, cloudGroupId=localStorage.getItem('cnr_cloud_group_id')||'', cloudGroupCode=localStorage.getItem('cnr_cloud_group_code')||'', cloudChannel=null, cloudBusy=false, cloudTimer=null, cloudApplying=false, cloudAuthPromise=null;
@@ -310,9 +310,17 @@ function cloudCfg(){try{const saved=JSON.parse(localStorage.getItem('cnr_supabas
 function cloudReady(){const c=cloudCfg();return !!(c?.url&&c?.key&&window.supabase)}
 function cloudInputCode(){return normalizeCode(document.getElementById('cloudGroupCode')?.value||'')}
 function cloudInputName(){return String(document.getElementById('cloudGroupName')?.value||'Cerveja na Rede').trim()}
+async function initCloudClient(){
+  const c=cloudCfg();
+  if(!c?.url||!c?.key)throw new Error('Configuração Supabase ausente.');
+  if(!window.supabase)throw new Error('Biblioteca Supabase não carregou. Verifique a internet.');
+  if(!cloudClient){
+    cloudClient=window.supabase.createClient(c.url,c.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
+  }
+  return cloudClient;
+}
 async function ensureCloudAuth(){
-  if(!cloudClient) await initCloudClient();
-  if(!cloudClient) throw new Error('Supabase não foi inicializado.');
+  if(!cloudClient)await initCloudClient();
   if(cloudAuthPromise)return cloudAuthPromise;
   cloudAuthPromise=(async()=>{
     const current=await cloudClient.auth.getSession();
@@ -324,13 +332,6 @@ async function ensureCloudAuth(){
     return result.data.session;
   })().catch(e=>{cloudAuthPromise=null;throw e});
   return cloudAuthPromise;
-}
-async function initCloudClient(){
-  const c=cloudCfg();
-  if(!c?.url||!c?.key||!window.supabase)throw new Error('Configuração Supabase ausente.');
-  if(!cloudClient)cloudClient=window.supabase.createClient(c.url,c.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
-  await ensureCloudAuth();
-  return cloudClient;
 }
 async function initCloud(){
   if(!cloudReady()){updateCloudUI();return}
@@ -369,6 +370,7 @@ async function createOnlineGroup(){
   const name=cloudInputName();const code=cloudInputCode()||('CRN-'+Math.floor(1000+Math.random()*9000));
   try{
     await initCloudClient();
+    await ensureCloudAuth();
     const {data,error}=await cloudClient.rpc('create_group',{p_name:name,p_code:code});
     if(error)throw error;
     const g=Array.isArray(data)?data[0]:data;if(!g?.id)throw new Error('O Supabase não retornou o grupo criado.');
@@ -383,6 +385,7 @@ async function joinOnlineGroup(){
   if(!code){toast('Digite o código do grupo');document.getElementById('cloudGroupCode')?.focus();return}
   try{
     await initCloudClient();
+    await ensureCloudAuth();
     const {data,error}=await cloudClient.rpc('join_group',{p_code:code});
     if(error)throw error;
     const g=Array.isArray(data)?data[0]:data;if(!g?.id)throw new Error('Código não encontrado.');
