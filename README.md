@@ -25,8 +25,3 @@ Esta versão mantém todos os recursos anteriores e adiciona **grupo online comp
 **Nunca coloque a chave `service_role` no aplicativo.**
 
 Depois disso, crie um grupo e passe o código para as outras pessoas. Todos os celulares que entrarem pelo mesmo código verão os mesmos dados.
-
-
-## V11 — correção do acesso online
-
-A V11 corrige a autenticação anônima do Supabase: o aplicativo agora confirma a sessão antes de criar/entrar em um grupo, mostra o erro real de conexão e inclui o botão **Testar conexão**. O Service Worker também foi atualizado para a V11.
