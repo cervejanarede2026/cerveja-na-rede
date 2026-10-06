@@ -94,7 +94,7 @@ async function migrateLegacyData(){
 async function syncPlayers(){
   if(cloudApplying||!cloudClient||!cloudGroupId)return;
   let current=[];try{current=safeJSON(localStorage.getItem(PKEY)||'[]',[])}catch(e){return}
-  const next=new Map(current.map(p=>[String(p.id),p]));
+  const next=new Map((Array.isArray(current)?current:[]).map(p=>[String(p.id),p]));
   const old=new Set(cloudPlayerCache.keys());
   const changed=[];
   for(const [id,p] of next){if(JSON.stringify(cloudPlayerCache.get(id))!==JSON.stringify(p))changed.push({id,data:p,updated_at:new Date().toISOString(),updated_by:null})}
@@ -118,26 +118,82 @@ function scheduleFixedState(key){
   },250);
 }
 
+async function pullFixedData(){
+  if(!cloudClient||!cloudGroupId||cloudBusy)return false;
+  try{
+    await ensureCloudAuth();
+    const [{data:prs,error:pe},{data:sts,error:se}]=await Promise.all([
+      cloudClient.from('fixed_players').select('id,data,updated_at'),
+      cloudClient.from('fixed_state').select('key,state,updated_at')
+    ]);
+    if(pe)throw pe;if(se)throw se;
+    const remotePlayers=(prs||[]).filter(r=>r&&r.id&&r.data);
+    const remoteCache=new Map(remotePlayers.map(r=>[String(r.id),r.data]));
+    const remoteArr=[...remoteCache.values()];
+    const localArr=safeJSON(localStorage.getItem(PKEY)||'[]',[]);
+    const samePlayers=JSON.stringify(localArr)===JSON.stringify(remoteArr);
+    if(!samePlayers){
+      cloudPlayerCache=remoteCache;
+      cloudApplying=true;
+      localStorage.setItem(PKEY,JSON.stringify(remoteArr));
+      cloudApplying=false;
+    }else cloudPlayerCache=remoteCache;
+    let stateChanged=false;
+    for(const r of(sts||[])){
+      if(!FIXED_STATE_KEYS.includes(r.key))continue;
+      const localRaw=localStorage.getItem(r.key);
+      const remoteRaw=JSON.stringify(r.state===undefined?null:r.state);
+      if(localRaw!==remoteRaw){
+        cloudApplying=true;
+        localStorage.setItem(r.key,remoteRaw);
+        cloudApplying=false;
+        stateChanged=true;
+      }
+    }
+    if(!samePlayers||stateChanged)renderAllFromCloud();
+    return true;
+  }catch(e){console.warn('pullFixedData:',e);return false}
+}
+
+let cloudPullTimer=null;
+function startCloudSyncLoop(){
+  clearInterval(cloudPullTimer);
+  cloudPullTimer=setInterval(async()=>{
+    if(document.visibilityState==='hidden')return;
+    try{
+      await syncPlayers();
+      for(const k of FIXED_STATE_KEYS){
+        if(!cloudClient||!cloudGroupId)break;
+        const v=localStorage.getItem(k);
+        if(v!==null){
+          // A sincronização normal é feita pelos interceptadores; aqui apenas garantimos que mudanças remotas sejam recuperadas.
+        }
+      }
+      await pullFixedData();
+    }catch(e){console.warn('cloud loop:',e)}
+  },3000);
+}
+
+async function resyncFromServer(){
+  await pullFixedData();
+}
+
 function subscribeFixed(){
   if(cloudPlayersChannel)cloudClient.removeChannel(cloudPlayersChannel);
   if(cloudStateChannel)cloudClient.removeChannel(cloudStateChannel);
-  cloudPlayersChannel=cloudClient.channel('cnr-v16-fixed-players').on('postgres_changes',{event:'*',schema:'public',table:'fixed_players'},payload=>{
-    if(cloudApplying)return;
-    if(payload.eventType==='DELETE'){cloudPlayerCache.delete(String(payload.old.id));cloudApplying=true;localStorage.setItem(PKEY,JSON.stringify([...cloudPlayerCache.values()]));cloudApplying=false}
-    else if(payload.new){cloudPlayerCache.set(String(payload.new.id),payload.new.data);cloudApplying=true;localStorage.setItem(PKEY,JSON.stringify([...cloudPlayerCache.values()]));cloudApplying=false}
-    renderAllFromCloud();
-  }).subscribe();
-  cloudStateChannel=cloudClient.channel('cnr-v16-fixed-state').on('postgres_changes',{event:'*',schema:'public',table:'fixed_state'},payload=>{
-    if(cloudApplying||!payload.new?.key)return;
-    const key=String(payload.new.key);if(!FIXED_STATE_KEYS.includes(key))return;
-    cloudApplying=true;localStorage.setItem(key,JSON.stringify(payload.new.state));cloudApplying=false;renderAllFromCloud();
-  }).subscribe();
+  cloudPlayersChannel=cloudClient.channel('cnr-v20-fixed-players')
+    .on('postgres_changes',{event:'*',schema:'public',table:'fixed_players'},async()=>{await resyncFromServer()})
+    .subscribe((status)=>{console.log('Realtime jogadores:',status);if(status==='SUBSCRIBED')resyncFromServer();if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED')setTimeout(()=>{if(cloudClient)subscribeFixed()},1500)});
+  cloudStateChannel=cloudClient.channel('cnr-v20-fixed-state')
+    .on('postgres_changes',{event:'*',schema:'public',table:'fixed_state'},async()=>{await resyncFromServer()})
+    .subscribe((status)=>{console.log('Realtime estado:',status);if(status==='SUBSCRIBED')resyncFromServer();if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED')setTimeout(()=>{if(cloudClient)subscribeFixed()},1500)});
 }
+
 function updateCloudUI(err){const st=document.getElementById('cloudStatus'),info=document.getElementById('cloudInfo');if(!st)return;if(err){st.textContent=err;info.textContent='Os dados locais continuam preservados.';return}if(cloudGroupId){st.textContent='🟢 ONLINE • Grupo fixo';info.textContent='Todos os celulares usam o mesmo grupo automaticamente.'}else{st.textContent='🔄 Conectando...';info.textContent='Conectando ao grupo online fixo.'}}
 
 async function initCloud(){
   if(!cloudReady()){updateCloudUI('⚠️ Biblioteca Supabase não carregou');return}
-  try{await initCloudClient();await ensureCloudAuth();await fixedGroup();await loadFixedData();subscribeFixed();updateCloudUI();}
+  try{await initCloudClient();await ensureCloudAuth();await fixedGroup();await loadFixedData();subscribeFixed();startCloudSyncLoop();updateCloudUI();}
   catch(e){console.error('Supabase V16:',e);updateCloudUI('⚠️ '+cloudErrorMessage(e,'Não foi possível conectar'))}
 }
 
