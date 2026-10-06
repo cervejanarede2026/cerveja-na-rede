@@ -1,21 +1,27 @@
-# Cerveja na Rede — V16 Online Fixo
+# Cerveja na Rede — V10 Online
 
-Esta versão usa um único grupo online fixo. Todos os aparelhos que abrirem o aplicativo entram automaticamente no mesmo grupo, sem criar ou digitar código.
-
-## Configuração única no Supabase
-1. Abra o projeto `cerveja-na-rede` no Supabase.
-2. Vá em **SQL Editor > New query**.
-3. Abra o arquivo `SUPABASE_SETUP.sql` desta versão, copie todo o conteúdo e cole na nova consulta.
-4. Clique em **Run**.
-5. Confirme que **Authentication > Providers > Anonymous** está ativado.
-6. Em **Database > Publications**, confirme que `fixed_players` e `fixed_state` aparecem em `supabase_realtime`.
-
-Depois disso, basta publicar os arquivos no GitHub Pages. Não é necessário criar grupo nem conectar cada celular.
+Esta versão mantém todos os recursos anteriores e adiciona **grupo online compartilhado**.
 
 ## O que mudou
-- Grupo online fixo e automático.
-- Jogadores sincronizados por registro, evitando que editar uma pessoa apague a foto/dados de outra.
-- Fotos continuam compartilhadas junto do jogador.
-- Histórico, times, placar, estatísticas e torneios usam estado online separado.
-- Realtime para atualizações entre celulares.
-- Chave `sb_publishable_...` usada no navegador; nunca use uma chave `sb_secret_...` no GitHub.
+- ☁️ Criar grupo por código (ex.: CRN-8472)
+- ↗ Entrar em um grupo pelo código
+- 🔄 Sincronização em tempo real entre celulares
+- 👥 Jogadores, fotos, estrelas, posições e presença compartilhados
+- 🎲 Sorteios e times compartilhados
+- 🏆 Placar, sets e estatísticas compartilhados
+- 📊 Histórico, ranking e torneios compartilhados
+- 📴 Continua funcionando localmente quando não há internet
+
+## Configuração do banco
+
+1. Crie um projeto gratuito no Supabase.
+2. Em **Authentication → Providers**, ative **Anonymous sign-ins**.
+3. Abra **SQL Editor** e execute o arquivo `SUPABASE_SETUP.sql`.
+4. Em **Database → Replication**, adicione `public.group_state` à publicação `supabase_realtime`.
+5. No Cerveja na Rede, toque em **☁️ Grupo online → ⚙️** e informe:
+   - Project URL
+   - chave **anon/public**
+
+**Nunca coloque a chave `service_role` no aplicativo.**
+
+Depois disso, crie um grupo e passe o código para as outras pessoas. Todos os celulares que entrarem pelo mesmo código verão os mesmos dados.
