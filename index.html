@@ -302,18 +302,34 @@ if(document.getElementById('tourDate'))document.getElementById('tourDate').value
 </script>
 <script>
 
-/* ===== CERVEJA NA REDE — SINCRONIZAÇÃO ONLINE V14 ===== */
+/* ===== CERVEJA NA REDE — SINCRONIZAÇÃO ONLINE V15 ===== */
 const CLOUD_KEYS=['cnr_players_final','cnr_hist','cnr_tournaments','cnr_current_teams','cnr_match_meta','cnr_match_stats'];
 const DEFAULT_CLOUD_CONFIG={url:'https://sewbzgmpkindoftynkqp.supabase.co',key:'sb_publishable_PvY7Ctn-qr2Pu6kWLd5hww_EQH7USYU'};
 let cloudClient=null, cloudGroupId=localStorage.getItem('cnr_cloud_group_id')||'', cloudGroupCode=localStorage.getItem('cnr_cloud_group_code')||'', cloudChannel=null, cloudBusy=false, cloudTimer=null, cloudApplying=false, cloudAuthPromise=null;
-function cloudCfg(){try{const saved=JSON.parse(localStorage.getItem('cnr_supabase_config')||'null');return saved?.url&&saved?.key?saved:DEFAULT_CLOUD_CONFIG}catch{return DEFAULT_CLOUD_CONFIG}}
-function cloudReady(){const c=cloudCfg();return !!(c?.url&&c?.key&&window.supabase)}
+function normalizeCloudUrl(v){
+  let u=String(v||'').trim().replace(/\/$/,'');
+  // Corrige automaticamente o hostname antigo com grafia incorreta.
+  if(u.includes('sewbzgmpkindofynkqp.supabase.co')) u=DEFAULT_CLOUD_CONFIG.url;
+  return u;
+}
+function cloudCfg(){
+  try{
+    const saved=JSON.parse(localStorage.getItem('cnr_supabase_config')||'null');
+    if(saved?.url&&saved?.key){
+      const fixed={url:normalizeCloudUrl(saved.url),key:String(saved.key).trim()};
+      if(fixed.url!==saved.url)localStorage.setItem('cnr_supabase_config',JSON.stringify(fixed));
+      return fixed;
+    }
+  }catch(e){}
+  return DEFAULT_CLOUD_CONFIG;
+}
+function cloudReady(){const c=cloudCfg();return !!(c?.url&&c?.key&&window.supabase?.createClient)}
 function cloudInputCode(){return normalizeCode(document.getElementById('cloudGroupCode')?.value||'')}
 function cloudInputName(){return String(document.getElementById('cloudGroupName')?.value||'Cerveja na Rede').trim()}
 async function initCloudClient(){
   const c=cloudCfg();
-  if(!c?.url||!c?.key)throw new Error('Configuração Supabase ausente.');
-  if(!window.supabase)throw new Error('Biblioteca Supabase não carregou. Verifique a internet.');
+  if(!c?.url||!c?.key)throw new Error('Configuração do Supabase ausente.');
+  if(!window.supabase?.createClient)throw new Error('Biblioteca Supabase não carregou. Atualize a página e verifique a internet.');
   if(!cloudClient){
     cloudClient=window.supabase.createClient(c.url,c.key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
   }
@@ -328,21 +344,33 @@ async function ensureCloudAuth(){
     if(current.data?.session)return current.data.session;
     const result=await cloudClient.auth.signInAnonymously();
     if(result.error)throw result.error;
-    if(!result.data?.session)throw new Error('Supabase não retornou uma sessão anônima.');
+    if(!result.data?.session)throw new Error('Supabase não retornou uma sessão anônima. Confirme que Anonymous Sign-Ins está ativado.');
     return result.data.session;
   })().catch(e=>{cloudAuthPromise=null;throw e});
   return cloudAuthPromise;
 }
+async function testCloudConnection(){
+  const c=cloudCfg();
+  if(!c?.url||!c?.key)throw new Error('Configuração do Supabase ausente.');
+  const r=await fetch(c.url+'/auth/v1/settings',{method:'GET',headers:{apikey:c.key,'Content-Type':'application/json'},cache:'no-store'});
+  if(!r.ok){let detail='';try{detail=await r.text()}catch(e){}throw new Error('Supabase respondeu HTTP '+r.status+(detail?': '+detail.slice(0,180):''));}
+  return true;
+}
 async function initCloud(){
-  if(!cloudReady()){updateCloudUI();return}
+  if(!cloudReady()){updateCloudUI('⚠️ Biblioteca Supabase não carregou');return}
   try{
     await initCloudClient();
-    if(cloudGroupId)await connectCloudGroup(cloudGroupId,cloudGroupCode,false);
+    await testCloudConnection();
+    if(cloudGroupId){
+      await ensureCloudAuth();
+      await connectCloudGroup(cloudGroupId,cloudGroupCode,false);
+    }
     updateCloudUI();
-  }catch(e){console.warn('Supabase init:',e);updateCloudUI('⚠️ Sem conexão online');}
+  }catch(e){console.warn('Supabase init:',e);updateCloudUI('⚠️ '+cloudErrorMessage(e,'Sem acesso ao Supabase'))}
 }
 async function connectCloudGroup(id,code,pull=true){
   if(!cloudClient)await initCloudClient();
+  await ensureCloudAuth();
   cloudGroupId=String(id||'');
   cloudGroupCode=normalizeCode(code);
   localStorage.setItem('cnr_cloud_group_id',cloudGroupId);
@@ -355,44 +383,45 @@ async function connectCloudGroup(id,code,pull=true){
 async function cloudPush(){
   if(!cloudClient||!cloudGroupId||cloudApplying)return;
   clearTimeout(cloudTimer);
-  cloudTimer=setTimeout(async()=>{try{cloudBusy=true;const {error}=await cloudClient.from('group_state').update({state:cloudSnapshot(),updated_at:new Date().toISOString()}).eq('group_id',cloudGroupId);if(error)throw error;}catch(e){console.warn('Cloud push:',e);updateCloudUI('⚠️ Falha ao sincronizar')}finally{cloudBusy=false}},500);
+  cloudTimer=setTimeout(async()=>{try{cloudBusy=true;await ensureCloudAuth();const {error}=await cloudClient.from('group_state').update({state:cloudSnapshot(),updated_at:new Date().toISOString()}).eq('group_id',cloudGroupId);if(error)throw error;}catch(e){console.warn('Cloud push:',e);updateCloudUI('⚠️ '+cloudErrorMessage(e,'Falha ao sincronizar'))}finally{cloudBusy=false}},500);
 }
 function updateCloudUI(err){const st=document.getElementById('cloudStatus'),info=document.getElementById('cloudInfo');if(!st)return;if(err){st.textContent=err;info.textContent='Os dados locais continuam preservados.';return}if(cloudGroupId){st.textContent='🟢 Grupo online '+cloudGroupCode;info.textContent='Dados compartilhados com o grupo em tempo real.'}else if(cloudReady()){st.textContent='Pronto para conectar';info.textContent='Crie um grupo ou entre com um código.'}else{st.textContent='Não configurado';info.textContent='Configure o banco online para compartilhar entre celulares.'}}
 function openCloud(){document.getElementById('cloudOverlay').style.display='flex';document.getElementById('cloudGroupName').value='Cerveja na Rede';document.getElementById('cloudGroupCode').value=cloudGroupCode||''}
 function closeCloud(){document.getElementById('cloudOverlay').style.display='none'}
 function openCloudConfig(){const c=cloudCfg()||{};sbUrl.value=c.url||'';sbKey.value=c.key||'';document.getElementById('configOverlay').style.display='flex'}
 function closeCloudConfig(){document.getElementById('configOverlay').style.display='none'}
-async function saveCloudConfig(){const url=sbUrl.value.trim().replace(/\/$/,'');const key=sbKey.value.trim();if(!/^https:\/\/[^ ]+\.supabase\.co$/.test(url)||!key){toast('Informe a URL e a chave publishable');return}localStorage.setItem('cnr_supabase_config',JSON.stringify({url,key}));closeCloudConfig();try{cloudClient=null;cloudAuthPromise=null;await initCloud();toast('Banco online conectado')}catch(e){console.error(e);toast('Não foi possível conectar ao banco')}}
+async function saveCloudConfig(){
+  const url=normalizeCloudUrl(sbUrl.value);const key=sbKey.value.trim();
+  if(!/^https:\/\/[^ ]+\.supabase\.co$/.test(url)||!key){toast('Informe a URL e a chave publishable');return}
+  localStorage.setItem('cnr_supabase_config',JSON.stringify({url,key}));closeCloudConfig();
+  try{cloudClient=null;cloudAuthPromise=null;await initCloudClient();await testCloudConnection();await ensureCloudAuth();updateCloudUI();toast('Banco online conectado')}catch(e){console.error('saveCloudConfig:',e);updateCloudUI('⚠️ '+cloudErrorMessage(e,'Não foi possível conectar ao banco'));toast(cloudErrorMessage(e,'Não foi possível conectar ao banco'))}
+}
 function normalizeCode(v){return String(v||'').trim().toUpperCase().replace(/[^A-Z0-9-]/g,'').slice(0,20)}
-function cloudErrorMessage(e,fallback){const m=String(e?.message||e?.error_description||e?.details||'').trim();if(/failed to fetch|networkerror|load failed/i.test(m))return 'Sem acesso ao Supabase. Verifique a internet.';if(/not_authenticated|jwt|auth/i.test(m))return 'Não foi possível autenticar este aparelho.';if(/duplicate|unique/i.test(m))return 'Esse código já existe. Escolha outro.';return m||fallback}
+function cloudErrorMessage(e,fallback){const m=String(e?.message||e?.error_description||e?.details||'').trim();if(/failed to fetch|networkerror|load failed|err_name_not_resolved|dns/i.test(m))return 'Sem acesso ao Supabase. Verifique a internet e o endereço do projeto.';if(/not_authenticated|anonymous|jwt|auth/i.test(m))return 'Não foi possível autenticar este aparelho. Confirme que o login anônimo está ativado.';if(/duplicate|unique/i.test(m))return 'Esse código já existe. Escolha outro.';return m||fallback}
 async function createOnlineGroup(){
   if(!cloudReady()){openCloudConfig();return}
   const name=cloudInputName();const code=cloudInputCode()||('CRN-'+Math.floor(1000+Math.random()*9000));
   try{
-    await initCloudClient();
-    await ensureCloudAuth();
-    const {data,error}=await cloudClient.rpc('create_group',{p_name:name,p_code:code});
-    if(error)throw error;
+    await initCloudClient();await testCloudConnection();await ensureCloudAuth();
+    const {data,error}=await cloudClient.rpc('create_group',{p_name:name,p_code:code});if(error)throw error;
     const g=Array.isArray(data)?data[0]:data;if(!g?.id)throw new Error('O Supabase não retornou o grupo criado.');
     await connectCloudGroup(g.id,g.code,false);
     const push=await cloudClient.from('group_state').update({state:cloudSnapshot(),updated_at:new Date().toISOString()}).eq('group_id',g.id);if(push.error)throw push.error;
     closeCloud();toast('Grupo criado: '+g.code);updateCloudUI();
-  }catch(e){console.error('createOnlineGroup:',e);toast(cloudErrorMessage(e,'Não foi possível criar o grupo'))}
+  }catch(e){console.error('createOnlineGroup:',e);toast(cloudErrorMessage(e,'Não foi possível criar o grupo'));updateCloudUI('⚠️ '+cloudErrorMessage(e,'Não foi possível criar o grupo'))}
 }
 async function joinOnlineGroup(){
   if(!cloudReady()){openCloudConfig();return}
   const code=cloudInputCode();
   if(!code){toast('Digite o código do grupo');document.getElementById('cloudGroupCode')?.focus();return}
   try{
-    await initCloudClient();
-    await ensureCloudAuth();
-    const {data,error}=await cloudClient.rpc('join_group',{p_code:code});
-    if(error)throw error;
+    await initCloudClient();await testCloudConnection();await ensureCloudAuth();
+    const {data,error}=await cloudClient.rpc('join_group',{p_code:code});if(error)throw error;
     const g=Array.isArray(data)?data[0]:data;if(!g?.id)throw new Error('Código não encontrado.');
     await connectCloudGroup(g.id,g.code,true);
     document.getElementById('cloudGroupCode').value=g.code;
     closeCloud();toast('Entrou no grupo '+g.code);updateCloudUI();
-  }catch(e){console.error('joinOnlineGroup:',e);toast(cloudErrorMessage(e,'Código não encontrado ou banco não configurado'))}
+  }catch(e){console.error('joinOnlineGroup:',e);toast(cloudErrorMessage(e,'Código não encontrado ou banco não configurado'));updateCloudUI('⚠️ '+cloudErrorMessage(e,'Não foi possível entrar no grupo'))}
 }
 function leaveOnlineGroup(){if(!confirm('Sair do grupo online neste aparelho?'))return;cloudGroupId='';cloudGroupCode='';localStorage.removeItem('cnr_cloud_group_id');localStorage.removeItem('cnr_cloud_group_code');if(cloudChannel&&cloudClient)cloudClient.removeChannel(cloudChannel);cloudChannel=null;updateCloudUI();toast('Saiu do grupo')}
 const _setItem=localStorage.setItem.bind(localStorage),_removeItem=localStorage.removeItem.bind(localStorage);
