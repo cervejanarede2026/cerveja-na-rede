@@ -19,3 +19,6 @@ Depois disso, basta publicar os arquivos no GitHub Pages. Não é necessário cr
 - Histórico, times, placar, estatísticas e torneios usam estado online separado.
 - Realtime para atualizações entre celulares.
 - Chave `sb_publishable_...` usada no navegador; nunca use uma chave `sb_secret_...` no GitHub.
+
+
+V23: correção do ReferenceError cloudDirtyPlayers (declaração movida para antes do uso).

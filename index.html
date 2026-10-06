@@ -239,6 +239,8 @@ function safeJSON(v,fallback=null){
 }
 
 
+// Variáveis de sincronização declaradas antes de qualquer função que possa ser executada.
+var cloudApplying=false, cloudPlayerCache=new Map(), cloudDirtyPlayers=new Set();
 const PKEY='cnr_players_final', HKEY='cnr_hist', TKEY='cnr_tournaments';
 let players=(()=>{const v=safeJSON(localStorage.getItem(PKEY)||'[]',[]);return Array.isArray(v)?v:[]})();
 let selectedPhoto='', A=0,B=0,sets=[];
@@ -325,11 +327,11 @@ if(document.getElementById('tourDate'))document.getElementById('tourDate').value
 
 </script>
 <script>
-/* ===== CERVEJA NA REDE V16 — GRUPO ONLINE FIXO ===== */
+/* ===== CERVEJA NA REDE V23 — GRUPO ONLINE FIXO ===== */
 const FIXED_STATE_KEYS=['cnr_hist','cnr_tournaments','cnr_current_teams','cnr_match_meta','cnr_match_stats'];
 const DEFAULT_CLOUD_CONFIG={url:'https://sewbzgmpkindoftynkqp.supabase.co',key:'sb_publishable_PvY7Ctn-qr2Pu6kWLd5hww_EQH7USYU'};
 let cloudClient=null, cloudGroupId='', cloudGroupCode='CRN-1556', cloudPlayersChannel=null, cloudStateChannel=null;
-let cloudBusy=false, cloudApplying=false, cloudAuthPromise=null, cloudStateTimers={}, cloudPlayerCache=new Map(), cloudDirtyPlayers=new Set();
+let cloudBusy=false, cloudAuthPromise=null, cloudStateTimers={};
 
 function cloudCfg(){return DEFAULT_CLOUD_CONFIG}
 function cloudReady(){const c=cloudCfg();return !!(c?.url&&c?.key&&window.supabase?.createClient)}
@@ -536,7 +538,7 @@ function updateCloudUI(err){const st=document.getElementById('cloudStatus'),info
 async function initCloud(){
   if(!cloudReady()){updateCloudUI('⚠️ Biblioteca Supabase não carregou');return}
   try{await initCloudClient();await ensureCloudAuth();await fixedGroup();await loadFixedData();subscribeFixed();updateCloudUI();}
-  catch(e){console.error('Supabase V21:',e);updateCloudUI('⚠️ '+cloudErrorMessage(e,'Não foi possível conectar'))}
+  catch(e){console.error('Supabase V23:',e);updateCloudUI('⚠️ '+cloudErrorMessage(e,'Não foi possível conectar'))}
 }
 
 // Intercepta apenas os dados que devem ser compartilhados. Jogadores são sincronizados por registro.
