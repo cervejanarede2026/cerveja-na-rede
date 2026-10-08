@@ -232,7 +232,6 @@ body.fullscreen-score main{max-width:none;width:100%;padding:0}
   </div>
   <div class="card"><div class="section-title"><div><h3>🌎 Fotos gerais</h3><p class="muted">Fotos que não pertencem a uma partida específica.</p></div><span id="generalGalleryCount" class="muted"></span></div><div id="generalGallery" class="album-grid general-gallery"></div></div>
   <div class="card"><div class="section-title"><div><h3>🏐 Fotos das partidas</h3><p class="muted">Cada álbum fica agrupado pela data e pelos times.</p></div></div><div id="matchGalleryArchive"></div></div>
-  <div class="card"><div class="section-title"><div><h3>🎥 Galeria de Vídeos</h3><p class="muted">Vídeos do grupo. Somente o administrador pode excluir.</p></div><span id="videoGalleryCount" class="muted"></span></div><div class="gallery-actions"><label class="btn primary" style="cursor:pointer">🎥 Gravar vídeo<input id="videoCamera" type="file" accept="video/*" capture="environment" style="display:none"></label><label class="btn ghost" style="cursor:pointer">📁 Escolher vídeos<input id="videoFiles" type="file" accept="video/*" multiple style="display:none"></label></div><div id="videoGallery" class="album-grid" style="margin-top:10px"></div></div>
 </section>
 
 <section id="links" class="screen hidden">
@@ -243,6 +242,19 @@ body.fullscreen-score main{max-width:none;width:100%;padding:0}
     <button class="btn primary full" style="margin-top:9px" onclick="addImportantLink()">＋ Salvar link</button>
   </div>
   <div class="card"><div class="section-title"><h2>🔗 Links salvos</h2></div><div id="importantLinks"></div></div>
+  <div class="card">
+    <div class="section-title"><div><h3>🎥 Galeria de Vídeos</h3><p class="muted">Os vídeos ficam aqui, junto dos Vídeos e Links. O administrador pode excluir cada vídeo individualmente, como nas fotos.</p></div><span id="videoGalleryCount" class="muted"></span></div>
+    <div class="card" style="margin:8px 0 0;background:#101b20;border:1px solid #3b5560">
+      <div class="section-title"><div><b>🔐 Controle dos vídeos</b><div id="videoAdminStatus" class="muted">Administrador não autenticado</div></div></div>
+      <div class="admin-lock"><div><input id="videoAdminPassword" type="password" placeholder="Senha de administrador"></div><button class="btn primary" onclick="videoAdminLogin()">🔓 Entrar</button><button class="btn ghost" onclick="adminLogout()">🔒 Sair</button></div>
+      <p class="muted" style="margin-top:6px">Somente o administrador pode excluir vídeos. Para apagar um vídeo, clique nele e use “Excluir este vídeo”, ou use o botão de exclusão do vídeo.</p>
+    </div>
+    <div class="gallery-actions">
+      <label class="btn primary" style="cursor:pointer">🎥 Gravar vídeo<input id="videoCamera" type="file" accept="video/*" capture="environment" style="display:none"></label>
+      <label class="btn ghost" style="cursor:pointer">📁 Escolher vídeos<input id="videoFiles" type="file" accept="video/*" multiple style="display:none"></label>
+    </div>
+    <div id="videoGallery" class="album-grid" style="margin-top:10px"></div>
+  </div>
 </section>
 
 <section id="tournament" class="screen hidden">
@@ -301,7 +313,7 @@ function stars(n){return '⭐'.repeat(n)+'☆'.repeat(5-n)}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function localISO(){const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)}
 function fmtDate(v){if(!v)return '—';const m=String(v).match(/^(\\d{4})-(\\d{2})-(\\d{2})$/);return m?`${m[3]}/${m[2]}/${m[1]}`:String(v)}
-function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');if(id==='players')renderPlayers();if(id==='history')renderHistory();if(id==='home')renderPresence();if(id==='tournament')renderTournament();if(id==='score')renderCurrentAlbum();if(id==='gallery'){renderGeneralGallery();renderMatchGalleryArchive()}window.scrollTo(0,0)}
+function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');if(id==='players')renderPlayers();if(id==='history')renderHistory();if(id==='home')renderPresence();if(id==='tournament')renderTournament();if(id==='score')renderCurrentAlbum();if(id==='gallery'){renderGeneralGallery();renderMatchGalleryArchive()}if(id==='links'){renderImportantLinks();renderVideoGallery()}window.scrollTo(0,0)}
 document.querySelectorAll('.bottomnav button').forEach(b=>b.onclick=()=>{if(b.dataset.s==='home'&&b.textContent.includes('Sorteio')){show('home');setTimeout(()=>document.getElementById('nTeams').scrollIntoView({behavior:'smooth'}),50)}else show(b.dataset.s)});
 
 async function uploadPlayerPhoto(file, playerId){
@@ -420,7 +432,7 @@ async function handleMatchPhotos(e){const files=[...(e.target.files||[])];if(!fi
 function renderAlbumThumbs(id){const arr=matchAlbums[id]||[];return arr.length?`<div class="album-grid" style="margin-top:8px">${arr.map((x,i)=>`<img src="${esc(x.url)}" alt="Foto ${i+1}" loading="lazy" onclick="openGalleryImage('${esc(x.url)}','match',${i},'${esc(id)}')">`).join('')}</div>`:''}
 function prepareNextMatch(winnerIndex,loserIndex){if(!currentTeams.length||typeof winnerIndex!=='number'){show('history');return}let next=-1;for(let step=1;step<=currentTeams.length;step++){const idx=(loserIndex+step)%currentTeams.length;if(idx!==winnerIndex){next=idx;break}}if(next<0)next=loserIndex;matchMeta={id:'partida_'+Date.now()+'_'+Math.random().toString(36).slice(2,8),date:localISO(),teamAIndex:winnerIndex,teamBIndex:next,teamA:currentTeams[winnerIndex]?.name||'TIME A',teamB:currentTeams[next]?.name||'TIME B',automatic:true,previousMatchId:matchMeta?.id||null};localStorage.setItem('cnr_match_meta',JSON.stringify(matchMeta));matchStats={};localStorage.setItem('cnr_match_stats','{}');newGame();aTeamName.textContent=matchMeta.teamA;bTeamName.textContent=matchMeta.teamB;renderMatchStats();renderCurrentAlbum();show('score');toast(`Próxima partida: ${matchMeta.teamA} × ${matchMeta.teamB}`)}
 function clearHistory(){document.getElementById('adminPassword')?.focus();toast('Entre como administrador para apagar dados')}
-function setAdminUI(){document.documentElement.classList.toggle('is-admin',adminAuthenticated);const st=document.getElementById('adminStatus'),panel=document.getElementById('adminPanel');if(st)st.textContent=adminAuthenticated?'🟢 Administrador autenticado':'🔒 Administrador não autenticado';if(panel)panel.style.display=adminAuthenticated?'block':'none';renderGeneralGallery();renderVideoGallery();renderCurrentAlbum();renderHistory()}
+function setAdminUI(){document.documentElement.classList.toggle('is-admin',adminAuthenticated);const st=document.getElementById('adminStatus'),panel=document.getElementById('adminPanel'),gst=document.getElementById('galleryAdminStatus'),vst=document.getElementById('videoAdminStatus');if(st)st.textContent=adminAuthenticated?'🟢 Administrador autenticado':'🔒 Administrador não autenticado';if(gst)gst.textContent=adminAuthenticated?'🟢 Administrador autenticado':'🔒 Administrador não autenticado';if(vst)vst.textContent=adminAuthenticated?'🟢 Administrador autenticado':'🔒 Administrador não autenticado';if(panel)panel.style.display=adminAuthenticated?'block':'none';renderGeneralGallery();renderVideoGallery();renderCurrentAlbum();renderHistory()}
 async function adminLogin(){const input=document.getElementById('adminPassword');const password=(input?.value||'').trim();if(!password){toast('Digite a senha de administrador');return}try{await ensureCloudAuth();const {data,error}=await cloudClient.rpc('admin_login',{p_password:password});if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Senha inválida');adminAuthenticated=true;input.value='';setAdminUI();toast('Administrador autenticado')}catch(e){console.error('Admin login:',e);adminAuthenticated=false;setAdminUI();const msg=String(e?.message||e?.details||'').trim();if(/senha inválida|senha incorreta/i.test(msg))toast('Senha de administrador incorreta');else if(/admin_login|function|schema cache|does not exist/i.test(msg))toast('Administração não configurada no Supabase');else toast(msg||'Não foi possível entrar como administrador')}}
 async function adminLogout(){try{if(cloudClient){await ensureCloudAuth();await cloudClient.rpc('admin_logout')}}catch(e){}adminAuthenticated=false;setAdminUI();toast('Sessão de administrador encerrada')}
 async function adminChangePassword(){if(!adminAuthenticated){toast('Entre como administrador primeiro');return}const a=document.getElementById('newAdminPassword')?.value||'',b=document.getElementById('newAdminPassword2')?.value||'';if(a.length<8){toast('A nova senha deve ter pelo menos 8 caracteres');return}if(a!==b){toast('As senhas não conferem');return}try{await ensureCloudAuth();const {data,error}=await cloudClient.rpc('admin_change_password',{p_new_password:a});if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Não foi possível alterar');document.getElementById('newAdminPassword').value='';document.getElementById('newAdminPassword2').value='';toast('Senha alterada com sucesso')}catch(e){console.error(e);toast('Não foi possível alterar a senha')}}
@@ -489,6 +501,14 @@ async function deleteMatchPhoto(matchId,index){
 }
 async function galleryAdminLogin(){
   const input=document.getElementById('galleryAdminPassword');
+  const password=(input?.value||'').trim();
+  if(!password){toast('Digite a senha de administrador');return}
+  const historyInput=document.getElementById('adminPassword');if(historyInput)historyInput.value=password;
+  await adminLogin();
+  if(adminAuthenticated){input.value='';setAdminUI();}
+}
+async function videoAdminLogin(){
+  const input=document.getElementById('videoAdminPassword');
   const password=(input?.value||'').trim();
   if(!password){toast('Digite a senha de administrador');return}
   const historyInput=document.getElementById('adminPassword');if(historyInput)historyInput.value=password;
