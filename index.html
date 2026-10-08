@@ -243,7 +243,7 @@ body.fullscreen-score main{max-width:none;width:100%;padding:0}
   </div>
   <div class="card"><div class="section-title"><h2>🔗 Links salvos</h2></div><div id="importantLinks"></div></div>
   <div class="card">
-    <div class="section-title"><div><h3>🎥 Galeria de Vídeos</h3><p class="muted">Os vídeos ficam aqui, junto dos Vídeos e Links. O administrador pode excluir cada vídeo individualmente, como nas fotos.</p></div><span id="videoGalleryCount" class="muted"></span></div>
+    <div class="section-title"><div><h3>🎥 Galeria de Vídeos</h3><p class="muted">Os vídeos ficam aqui, junto dos Vídeos e Links. O app tenta compactar automaticamente para reduzir o espaço usado, e o administrador pode excluir cada vídeo individualmente, como nas fotos.</p></div><span id="videoGalleryCount" class="muted"></span></div>
     <div class="card" style="margin:8px 0 0;background:#101b20;border:1px solid #3b5560">
       <div class="section-title"><div><b>🔐 Controle dos vídeos</b><div id="videoAdminStatus" class="muted">Administrador não autenticado</div></div></div>
       <div class="admin-lock"><div><input id="videoAdminPassword" type="password" placeholder="Senha de administrador"></div><button class="btn primary" onclick="videoAdminLogin()">🔓 Entrar</button><button class="btn ghost" onclick="adminLogout()">🔒 Sair</button></div>
@@ -515,18 +515,84 @@ async function videoAdminLogin(){
   await adminLogin();
   if(adminAuthenticated){input.value='';setAdminUI();}
 }
+async function compressVideo(file){
+  if(!file)return file;
+  if(typeof MediaRecorder==='undefined' || !HTMLCanvasElement.prototype.captureStream) return file;
+  let sourceUrl='',video=null,canvas=null,ctx=null,audioCtx=null,audioSource=null,audioDest=null,recorder=null,raf=0,stream=null;
+  try{
+    sourceUrl=URL.createObjectURL(file);
+    video=document.createElement('video');
+    video.muted=true;video.playsInline=true;video.preload='auto';video.src=sourceUrl;
+    await new Promise((resolve,reject)=>{video.onloadedmetadata=()=>resolve();video.onerror=()=>reject(new Error('Não foi possível ler o vídeo.'))});
+    const maxW=720,maxH=720;
+    let w=video.videoWidth||1280,h=video.videoHeight||720;
+    const scale=Math.min(1,maxW/w,maxH/h);
+    w=Math.max(2,Math.round(w*scale));h=Math.max(2,Math.round(h*scale));
+    if(w%2)w--;if(h%2)h--;
+    canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;ctx=canvas.getContext('2d',{alpha:false});
+    stream=canvas.captureStream(24);
+    try{
+      audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+      audioSource=audioCtx.createMediaElementSource(video);
+      audioDest=audioCtx.createMediaStreamDestination();
+      audioSource.connect(audioDest);
+      audioSource.connect(audioCtx.destination);
+      const audioTrack=audioDest.stream.getAudioTracks()[0];
+      if(audioTrack)stream.addTrack(audioTrack);
+      if(audioCtx.state==='suspended')await audioCtx.resume();
+    }catch(e){console.warn('Áudio não pôde ser incluído na compactação:',e)}
+    const mimeCandidates=['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];
+    const mime=mimeCandidates.find(x=>MediaRecorder.isTypeSupported(x));
+    if(!mime)return file;
+    const chunks=[];
+    recorder=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:1200000,audioBitsPerSecond:96000});
+    recorder.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
+    const finished=new Promise((resolve,reject)=>{recorder.onstop=()=>resolve(new Blob(chunks,{type:mime}));recorder.onerror=e=>reject(e.error||e)});
+    const draw=()=>{if(!video||video.ended)return;ctx.drawImage(video,0,0,w,h);raf=requestAnimationFrame(draw)};
+    recorder.start(500);
+    await video.play();
+    draw();
+    await new Promise(resolve=>{video.onended=resolve});
+    cancelAnimationFrame(raf);
+    if(recorder.state!=='inactive')recorder.stop();
+    const blob=await finished;
+    if(blob.size && blob.size<file.size*0.98){
+      const base=String(file.name||'video').replace(/\.[^.]+$/,'')||'video';
+      return new File([blob],base+'.webm',{type:'video/webm',lastModified:Date.now()});
+    }
+    return file;
+  }catch(e){
+    console.warn('Compactação automática do vídeo falhou; usando arquivo original.',e);
+    try{if(recorder&&recorder.state!=='inactive')recorder.stop()}catch(_){}
+    return file;
+  }finally{
+    cancelAnimationFrame(raf);
+    try{if(audioSource)audioSource.disconnect()}catch(_){}
+    try{if(audioCtx)await audioCtx.close()}catch(_){}
+    try{if(video)video.pause()}catch(_){}
+    if(sourceUrl)URL.revokeObjectURL(sourceUrl);
+  }
+}
 async function uploadVideoFile(file){
   if(!file)return;
   if(file.size>50*1024*1024){toast('Vídeo muito grande. Limite do aplicativo: 50 MB por vídeo.');return}
-  await ensureCloudAuth();
-  const ext=(String(file.name||'').split('.').pop()||'mp4').toLowerCase().replace(/[^a-z0-9]/g,'')||'mp4';
-  const path=`videos/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
-  const {error}=await cloudClient.storage.from(PHOTO_BUCKET).upload(path,file,{contentType:file.type||'video/mp4',upsert:false,cacheControl:'31536000'});
-  if(error)throw error;
-  const {data}=cloudClient.storage.from(PHOTO_BUCKET).getPublicUrl(path);
-  videoGallery.unshift({id:'v_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),url:data.publicUrl,path,name:file.name||'Vídeo',type:file.type||'video/mp4',size:file.size,createdAt:new Date().toISOString()});
-  localStorage.setItem(VIDEO_KEY,JSON.stringify(videoGallery));
-  renderVideoGallery();
+  try{
+    toast('⏳ Compactando vídeo automaticamente...');
+    const compressed=await compressVideo(file);
+    const wasCompressed=compressed!==file;
+    await ensureCloudAuth();
+    const ext=(String(compressed.name||file.name||'mp4').split('.').pop()||'webm').toLowerCase().replace(/[^a-z0-9]/g,'')||'webm';
+    const path=`videos/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+    const {error}=await cloudClient.storage.from(PHOTO_BUCKET).upload(path,compressed,{contentType:compressed.type||file.type||'video/webm',upsert:false,cacheControl:'31536000'});
+    if(error)throw error;
+    const {data}=cloudClient.storage.from(PHOTO_BUCKET).getPublicUrl(path);
+    videoGallery.unshift({id:'v_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),url:data.publicUrl,path,name:compressed.name||file.name||'Vídeo',originalName:file.name||'Vídeo',type:compressed.type||file.type||'video/webm',size:compressed.size,originalSize:file.size,compressed:wasCompressed,createdAt:new Date().toISOString()});
+    localStorage.setItem(VIDEO_KEY,JSON.stringify(videoGallery));
+    renderVideoGallery();
+    const saved=Math.max(0,file.size-(compressed.size||file.size));
+    const pct=file.size?Math.round(saved/file.size*100):0;
+    toast(wasCompressed?`✅ Vídeo compactado e salvo (${pct}% menor)`:'✅ Vídeo salvo');
+  }catch(e){console.error(e);toast(e?.message||'Não foi possível salvar o vídeo')}
 }
 function renderVideoGallery(){
   const box=document.getElementById('videoGallery');if(!box)return;
