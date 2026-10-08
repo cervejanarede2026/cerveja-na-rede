@@ -2,9 +2,9 @@
   "name": "Cerveja na Rede",
   "short_name": "Cerveja na Rede",
   "start_url": "./",
-  "scope": "./",
   "display": "standalone",
-  "background_color": "#06141e",
-  "theme_color": "#06141e",
-  "description": "Organizador de partidas de vôlei"
+  "background_color": "#081217",
+  "theme_color": "#081217",
+  "orientation": "portrait",
+  "icons": [{"src":"logo.png","sizes":"192x192","type":"image/png"}]
 }
