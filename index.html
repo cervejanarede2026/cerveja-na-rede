@@ -92,7 +92,7 @@ body.fullscreen-score main{max-width:none;width:100%;padding:0}
 @media(max-width:380px){.logo-card img{width:150px}.grid{grid-template-columns:1fr}.score{font-size:40px}}
 
 .toast{position:fixed;bottom:78px;left:50%;transform:translateX(-50%);background:#000e;color:#fff;padding:10px 14px;border-radius:999px;display:none;z-index:250;font-size:12px}
-.album-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.album-grid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;border:1px solid #3b5560;background:#17262d}.album-empty{padding:12px;border:1px dashed #3b5560;border-radius:10px;text-align:center}.admin-lock{display:flex;gap:7px;align-items:end}.admin-lock>div{flex:1}@media(max-width:420px){.album-grid{grid-template-columns:repeat(2,minmax(0,1fr))}} .general-gallery img{cursor:pointer}.gallery-actions{display:flex;gap:7px;flex-wrap:wrap}.admin-photo-delete{position:absolute;right:4px;top:4px}.match-gallery-card{margin-top:9px;padding:10px;border:1px solid #314953;border-radius:12px;background:#132128}.admin-photo-delete{display:none}.is-admin .admin-photo-delete{display:block}.link-card{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px;border:1px solid #314953;border-radius:12px;background:#132128;margin-top:7px}.link-card a{color:inherit;text-decoration:none;overflow-wrap:anywhere}.link-meta{flex:1}.link-actions{display:flex;gap:5px}.gallery-modal{position:fixed;inset:0;background:rgba(0,0,0,.86);z-index:9999;display:none;align-items:center;justify-content:center;padding:16px}.gallery-modal img{max-width:96vw;max-height:88vh;object-fit:contain;border-radius:12px}.gallery-modal button{position:absolute;top:14px;right:14px}@media(max-width:420px){.general-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}}</style>
+.album-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.album-grid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;border:1px solid #3b5560;background:#17262d}.album-empty{padding:12px;border:1px dashed #3b5560;border-radius:10px;text-align:center}.admin-lock{display:flex;gap:7px;align-items:end}.admin-lock>div{flex:1}@media(max-width:420px){.album-grid{grid-template-columns:repeat(2,minmax(0,1fr))}} .general-gallery img{cursor:pointer}.gallery-actions{display:flex;gap:7px;flex-wrap:wrap}.admin-photo-delete{position:absolute;right:4px;top:4px}.match-gallery-card{margin-top:9px;padding:10px;border:1px solid #314953;border-radius:12px;background:#132128}.admin-photo-delete{display:block;position:absolute;right:4px;top:4px;z-index:2}.admin-photo-locked{position:absolute;left:4px;bottom:4px;right:4px;background:rgba(0,0,0,.72);padding:3px 5px;border-radius:7px;font-size:10px;text-align:center}.link-card{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px;border:1px solid #314953;border-radius:12px;background:#132128;margin-top:7px}.link-card a{color:inherit;text-decoration:none;overflow-wrap:anywhere}.link-meta{flex:1}.link-actions{display:flex;gap:5px}.gallery-modal{position:fixed;inset:0;background:rgba(0,0,0,.86);z-index:9999;display:none;align-items:center;justify-content:center;padding:16px}.gallery-modal img{max-width:96vw;max-height:88vh;object-fit:contain;border-radius:12px}.gallery-modal button{position:absolute;top:14px;right:14px}@media(max-width:420px){.general-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}}</style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -224,6 +224,7 @@ body.fullscreen-score main{max-width:none;width:100%;padding:0}
 <section id="gallery" class="screen hidden">
   <div class="backhome"><button class="btn ghost" onclick="show('home')">← Início</button></div>
   <div class="card"><div class="section-title"><div><h2>📸 Galeria de Fotos</h2><p class="muted">Todas as fotos ficam organizadas por origem: gerais e por partida.</p></div></div>
+    <div class="card" style="margin:8px 0 0;background:#101b20;border:1px solid #3b5560"><div class="section-title"><div><b>🔐 Controle das fotos</b><div id="galleryAdminStatus" class="muted">Administrador não autenticado</div></div></div><div class="admin-lock"><div><input id="galleryAdminPassword" type="password" placeholder="Senha de administrador"></div><button class="btn primary" onclick="galleryAdminLogin()">🔓 Entrar</button><button class="btn ghost" onclick="adminLogout()">🔒 Sair</button></div><p class="muted" style="margin-top:6px">Somente o administrador pode excluir fotos, inclusive fotos antigas que já estavam cadastradas.</p></div>
     <div class="gallery-actions">
       <label class="btn primary" style="cursor:pointer">📷 Tirar foto<input id="generalCamera" type="file" accept="image/*" capture="environment" style="display:none"></label>
       <label class="btn ghost" style="cursor:pointer">🖼️ Galeria<input id="generalPhotos" type="file" accept="image/*" multiple style="display:none"></label>
@@ -295,7 +296,7 @@ function stars(n){return '⭐'.repeat(n)+'☆'.repeat(5-n)}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function localISO(){const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)}
 function fmtDate(v){if(!v)return '—';const m=String(v).match(/^(\\d{4})-(\\d{2})-(\\d{2})$/);return m?`${m[3]}/${m[2]}/${m[1]}`:String(v)}
-function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');if(id==='players')renderPlayers();if(id==='history')renderHistory();if(id==='home')renderPresence();if(id==='tournament')renderTournament();if(id==='score')renderCurrentAlbum();window.scrollTo(0,0)}
+function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');if(id==='players')renderPlayers();if(id==='history')renderHistory();if(id==='home')renderPresence();if(id==='tournament')renderTournament();if(id==='score')renderCurrentAlbum();if(id==='gallery'){renderGeneralGallery();renderMatchGalleryArchive()}window.scrollTo(0,0)}
 document.querySelectorAll('.bottomnav button').forEach(b=>b.onclick=()=>{if(b.dataset.s==='home'&&b.textContent.includes('Sorteio')){show('home');setTimeout(()=>document.getElementById('nTeams').scrollIntoView({behavior:'smooth'}),50)}else show(b.dataset.s)});
 
 async function uploadPlayerPhoto(file, playerId){
@@ -381,10 +382,66 @@ function recordTournamentWinner(tid,mid,winner){const t=tournaments.find(x=>x.id
 function renderTournament(){const tv=document.getElementById('tournamentView');if(!tv)return;const t=tournaments[0];if(!t){tv.innerHTML='<div class="muted">Nenhum torneio criado ainda. Crie um usando os times sorteados.</div>';if(document.getElementById('tourDate'))tourDate.value=localISO();return}const teamMap=Object.fromEntries(t.teams.map(x=>[x.id,x]));const photoForTeam=id=>{const ct=currentTeams.find(q=>q.id===id);const pp=ct?.players?.map(pid=>players.find(q=>String(q.id)===String(pid))).find(Boolean);return pp?.photo||''};const standings=[...t.teams].sort((a,b)=>b.wins-a.wins||a.name.localeCompare(b.name,'pt-BR'));const rows=standings.map((x,i)=>`<tr><td>${i+1}</td><td><span class="photo-name">${photoForTeam(x.id)?`<img class="rank-avatar" src="${photoForTeam(x.id)}">`:''}${esc(x.name)}</span></td><td>${x.wins}</td><td>${x.losses}</td></tr>`).join('');const matches=t.matches.map(m=>{const a=teamMap[m.a]?.name||'Equipe';const b=m.b?teamMap[m.b]?.name||'Equipe':'Folga';return `<div class="tmatch"><select onchange="recordTournamentWinner(${t.id},'${m.id}',this.value)"><option value="">${m.winner?'Resultado registrado':'Escolher vencedor'}</option><option value="${m.a}" ${m.winner===m.a?'selected':''}>${esc(a)}</option>${m.b?`<option value="${m.b}" ${m.winner===m.b?'selected':''}>${esc(b)}</option>`:'<option value="'+m.a+'">'+esc(a)+' (folga)</option>'}</select><span>×</span><div>${esc(a)} ${m.b?'× '+esc(b):'— folga'}</div><span class="done">${m.winner?'✓':''}</span></div>`}).join('');tv.innerHTML=`<div class="section-title"><div><b>${esc(t.name)}</b><div class="muted">${fmtDate(t.date)} • ${t.format==='roundrobin'?'Todos contra todos':'Mata-mata'}</div></div></div><h3 style="font-size:12px">Classificação</h3><table class="rank-table"><thead><tr><th>#</th><th>Equipe</th><th>V</th><th>D</th></tr></thead><tbody>${rows}</tbody></table><h3 style="font-size:12px;margin-top:14px">Partidas</h3>${matches}`;tourDate.value=t.date}
 
 async function uploadGeneralPhoto(file){if(!file)return;await ensureCloudAuth();const prepared=await preparePlayerPhoto(file);const blob=await (await fetch(prepared)).blob();const path=`general/${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;const {error}=await cloudClient.storage.from(PHOTO_BUCKET).upload(path,blob,{contentType:'image/jpeg',upsert:false,cacheControl:'31536000'});if(error)throw error;const {data}=cloudClient.storage.from(PHOTO_BUCKET).getPublicUrl(path);generalGallery.unshift({id:'g_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),url:data.publicUrl,path,createdAt:new Date().toISOString()});localStorage.setItem(GKEY,JSON.stringify(generalGallery));renderGeneralGallery();toast('Foto adicionada à galeria')}
-function renderGeneralGallery(){const box=document.getElementById('generalGallery');if(!box)return;const c=document.getElementById('generalGalleryCount');if(c)c.textContent=`${generalGallery.length} foto(s)`;box.innerHTML=generalGallery.length?generalGallery.map((x,i)=>`<div style="position:relative"><img src="${esc(x.url)}" alt="Foto geral ${i+1}" loading="lazy" onclick="openGalleryImage('${esc(x.url)}')"><button class="btn danger smallbtn admin-photo-delete" title="Excluir foto" onclick="event.stopPropagation();deleteGeneralPhoto(${i})">×</button></div>`).join(''):'<div class="album-empty">📷 Nenhuma foto geral adicionada ainda.</div>';if(typeof renderMatchGalleryArchive==='function')renderMatchGalleryArchive()}
-async function deleteGeneralPhoto(i){if(!adminAuthenticated){toast('Entre como administrador para excluir fotos');return}const item=generalGallery[i];if(!item)return;if(!confirm('Excluir esta foto da galeria?'))return;try{await ensureCloudAuth();const {data,error}=await cloudClient.rpc('admin_delete_photo',{p_path:item.path});if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Acesso negado');const rm=await cloudClient.storage.from(PHOTO_BUCKET).remove([item.path]);if(rm.error)throw rm.error;generalGallery.splice(i,1);localStorage.setItem(GKEY,JSON.stringify(generalGallery));renderGeneralGallery();toast('Foto excluída')}catch(e){console.error(e);toast('Não foi possível excluir a foto')}}
-function renderMatchGalleryArchive(){const box=document.getElementById('matchGalleryArchive');if(!box)return;const h=safeJSON(localStorage.getItem(HKEY)||'[]',[]);const ids=Object.keys(matchAlbums||{}).filter(id=>(matchAlbums[id]||[]).length);if(!ids.length){box.innerHTML='<div class="muted">Nenhuma foto de partida armazenada ainda.</div>';return}const byId=Object.fromEntries((h||[]).map(x=>[String(x.id),x]));box.innerHTML=ids.slice().reverse().map(id=>{const m=byId[id]||{};const arr=matchAlbums[id]||[];const title=m.teamA&&m.teamB?`${m.teamA} × ${m.teamB}`:'Partida';return `<div class="match-gallery-card"><div class="section-title"><div><b>🏐 ${esc(title)}</b><div class="muted">${m.date?fmtDate(m.date):'Data não informada'} • ${arr.length} foto(s)</div></div></div><div class="album-grid">${arr.map((x,i)=>`<div style="position:relative"><img src="${esc(x.url)}" alt="Foto da partida" loading="lazy" onclick="openGalleryImage('${esc(x.url)}')"><button class="btn danger smallbtn admin-photo-delete" title="Excluir foto" onclick="event.stopPropagation();deleteMatchPhoto('${esc(id)}',${i})">×</button></div>`).join('')}</div></div>`}).join('')}
-async function deleteMatchPhoto(matchId,index){if(!adminAuthenticated){toast('Entre como administrador para excluir fotos');return}const arr=matchAlbums[matchId]||[];const item=arr[index];if(!item)return;if(!confirm('Excluir esta foto da partida?'))return;try{await ensureCloudAuth();const {data,error}=await cloudClient.rpc('admin_delete_photo',{p_path:item.path});if(error)throw error;if(!data?.ok)throw new Error(data?.message||'Acesso negado');const rm=await cloudClient.storage.from(PHOTO_BUCKET).remove([item.path]);if(rm.error)throw rm.error;arr.splice(index,1);if(!arr.length)delete matchAlbums[matchId];localStorage.setItem(AKEY,JSON.stringify(matchAlbums));renderCurrentAlbum();renderHistory();renderMatchGalleryArchive();toast('Foto excluída')}catch(e){console.error(e);toast('Não foi possível excluir a foto')}}
+function photoDeleteButton(kind,index,extra){
+  if(adminAuthenticated) return `<button class="btn danger smallbtn admin-photo-delete" title="Excluir foto" onclick="event.stopPropagation();${kind==='general'?`deleteGeneralPhoto(${index})`:`deleteMatchPhoto('${esc(extra)}',${index})`}">🗑️ Excluir</button>`;
+  return `<div class="admin-photo-locked">🔒 Entre como administrador para excluir</div>`;
+}
+function renderGeneralGallery(){
+  const box=document.getElementById('generalGallery');if(!box)return;
+  const c=document.getElementById('generalGalleryCount');if(c)c.textContent=`${generalGallery.length} foto(s)`;
+  box.innerHTML=generalGallery.length?generalGallery.map((x,i)=>`<div style="position:relative"><img src="${esc(x.url)}" alt="Foto geral ${i+1}" loading="lazy" onclick="openGalleryImage('${esc(x.url)}')">${photoDeleteButton('general',i)}</div>`).join(''):'<div class="album-empty">📷 Nenhuma foto geral adicionada ainda.</div>';
+  const ga=document.getElementById('galleryAdminStatus');if(ga)ga.textContent=adminAuthenticated?'🟢 Administrador autenticado — exclusão liberada':'🔒 Administrador não autenticado';
+  if(typeof renderMatchGalleryArchive==='function')renderMatchGalleryArchive();
+}
+async function removePhotoFromStorage(item){
+  if(!item?.path) return;
+  await ensureCloudAuth();
+  const {data,error}=await cloudClient.rpc('admin_delete_photo',{p_path:item.path});
+  if(error)throw error;
+  if(!data?.ok)throw new Error(data?.message||'Acesso negado');
+  const rm=await cloudClient.storage.from(PHOTO_BUCKET).remove([item.path]);
+  if(rm.error)throw rm.error;
+}
+async function deleteGeneralPhoto(i){
+  if(!adminAuthenticated){toast('Entre como administrador para excluir fotos');return}
+  const item=generalGallery[i];if(!item)return;
+  if(!confirm('Excluir esta foto da galeria?'))return;
+  try{
+    if(item.path) await removePhotoFromStorage(item);
+    generalGallery.splice(i,1);
+    localStorage.setItem(GKEY,JSON.stringify(generalGallery));
+    renderGeneralGallery();toast('Foto excluída');
+  }catch(e){console.error(e);toast('Não foi possível excluir a foto')}
+}
+function renderMatchGalleryArchive(){
+  const box=document.getElementById('matchGalleryArchive');if(!box)return;
+  const h=safeJSON(localStorage.getItem(HKEY)||'[]',[]);
+  const ids=Object.keys(matchAlbums||{}).filter(id=>(matchAlbums[id]||[]).length);
+  if(!ids.length){box.innerHTML='<div class="muted">Nenhuma foto de partida armazenada ainda.</div>';return}
+  const byId=Object.fromEntries((h||[]).map(x=>[String(x.id),x]));
+  box.innerHTML=ids.slice().reverse().map(id=>{
+    const m=byId[id]||{},arr=matchAlbums[id]||[],title=m.teamA&&m.teamB?`${m.teamA} × ${m.teamB}`:'Partida';
+    return `<div class="match-gallery-card"><div class="section-title"><div><b>🏐 ${esc(title)}</b><div class="muted">${m.date?fmtDate(m.date):'Data não informada'} • ${arr.length} foto(s)</div></div></div><div class="album-grid">${arr.map((x,i)=>`<div style="position:relative"><img src="${esc(x.url)}" alt="Foto da partida" loading="lazy" onclick="openGalleryImage('${esc(x.url)}')">${photoDeleteButton('match',i,id)}</div>`).join('')}</div></div>`;
+  }).join('');
+}
+async function deleteMatchPhoto(matchId,index){
+  if(!adminAuthenticated){toast('Entre como administrador para excluir fotos');return}
+  const arr=matchAlbums[matchId]||[],item=arr[index];if(!item)return;
+  if(!confirm('Excluir esta foto da partida?'))return;
+  try{
+    if(item.path) await removePhotoFromStorage(item);
+    arr.splice(index,1);if(!arr.length)delete matchAlbums[matchId];
+    localStorage.setItem(AKEY,JSON.stringify(matchAlbums));renderCurrentAlbum();renderHistory();renderMatchGalleryArchive();toast('Foto excluída');
+  }catch(e){console.error(e);toast('Não foi possível excluir a foto')}
+}
+async function galleryAdminLogin(){
+  const input=document.getElementById('galleryAdminPassword');
+  const password=(input?.value||'').trim();
+  if(!password){toast('Digite a senha de administrador');return}
+  const historyInput=document.getElementById('adminPassword');if(historyInput)historyInput.value=password;
+  await adminLogin();
+  if(adminAuthenticated){input.value='';setAdminUI();}
+}
 function openGalleryImage(url){const m=document.getElementById('galleryModal'),img=document.getElementById('galleryModalImg');if(!m||!img)return;img.src=url;m.style.display='flex'}
 function closeGalleryImage(){const m=document.getElementById('galleryModal');if(m)m.style.display='none'}
 function normalizeUrl(v){v=String(v||'').trim();if(!v)return '';if(!/^https?:\/\//i.test(v))v='https://'+v;try{const u=new URL(v);return /^https?:$/.test(u.protocol)?u.href:''}catch(e){return ''}}
