@@ -92,7 +92,7 @@ body.fullscreen-score main{max-width:none;width:100%;padding:0}
 @media(max-width:380px){.logo-card img{width:150px}.grid{grid-template-columns:1fr}.score{font-size:40px}}
 
 .toast{position:fixed;bottom:78px;left:50%;transform:translateX(-50%);background:#000e;color:#fff;padding:10px 14px;border-radius:999px;display:none;z-index:250;font-size:12px}
-.album-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.album-grid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;border:1px solid #3b5560;background:#17262d}.album-empty{padding:12px;border:1px dashed #3b5560;border-radius:10px;text-align:center}.admin-lock{display:flex;gap:7px;align-items:end}.admin-lock>div{flex:1}@media(max-width:420px){.album-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}</style>
+.album-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.album-grid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;border:1px solid #3b5560;background:#17262d}.album-empty{padding:12px;border:1px dashed #3b5560;border-radius:10px;text-align:center}.admin-lock{display:flex;gap:7px;align-items:end}.admin-lock>div{flex:1}@media(max-width:420px){.album-grid{grid-template-columns:repeat(2,minmax(0,1fr))}} .general-gallery img{cursor:pointer}.gallery-actions{display:flex;gap:7px;flex-wrap:wrap}.link-card{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px;border:1px solid #314953;border-radius:12px;background:#132128;margin-top:7px}.link-card a{color:inherit;text-decoration:none;overflow-wrap:anywhere}.link-meta{flex:1}.link-actions{display:flex;gap:5px}.gallery-modal{position:fixed;inset:0;background:rgba(0,0,0,.86);z-index:9999;display:none;align-items:center;justify-content:center;padding:16px}.gallery-modal img{max-width:96vw;max-height:88vh;object-fit:contain;border-radius:12px}.gallery-modal button{position:absolute;top:14px;right:14px}@media(max-width:420px){.general-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}}</style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -127,6 +127,7 @@ body.fullscreen-score main{max-width:none;width:100%;padding:0}
 <p class="muted" style="font-size:11px;margin-top:8px">O aplicativo continua funcionando localmente se o banco não estiver configurado ou se você estiver sem internet.</p>
 </div></div>
 
+<div id="galleryModal" class="gallery-modal" onclick="closeGalleryImage()"><button class="btn dark" onclick="event.stopPropagation();closeGalleryImage()">✕</button><img id="galleryModalImg" src="" alt="Foto ampliada" onclick="event.stopPropagation()"></div>
 <main>
 <section id="home" class="screen">
   <div class="card" id="cloudCard"><div class="section-title"><div><h2>☁️ Cerveja na Rede <span id="cloudStatus" class="muted">Conectando...</span></h2><p id="cloudInfo" class="muted">Este aplicativo usa um grupo online fixo. Todos os celulares compartilham os mesmos dados automaticamente.</p></div><span style="font-size:24px">🟢</span></div></div>
@@ -211,6 +212,21 @@ body.fullscreen-score main{max-width:none;width:100%;padding:0}
   <div class="card"><div class="section-title"><h2>🔐 Administração</h2><span class="muted">Ações destrutivas protegidas</span></div><p class="muted">Para apagar partidas, ranking e álbuns, use a senha de administrador.</p><div class="admin-lock"><div><label>Senha de administrador</label><input id="adminPassword" type="password" placeholder="Digite a senha"></div><button class="btn danger" onclick="adminClearAll()">🗑️ Limpar partidas e ranking</button></div></div>
 </section>
 
+<section id="gallery" class="screen hidden">
+  <div class="backhome"><button class="btn ghost" onclick="show('home')">← Início</button></div>
+  <div class="card"><div class="section-title"><div><h2>📸 Galeria geral</h2><p class="muted">Fotos que não pertencem a uma partida específica.</p></div><label class="btn primary" style="cursor:pointer">＋ Adicionar fotos<input id="generalPhotos" type="file" accept="image/*" multiple style="display:none"></label></div><div id="generalGallery" class="album-grid general-gallery"></div></div>
+</section>
+
+<section id="links" class="screen hidden">
+  <div class="backhome"><button class="btn ghost" onclick="show('home')">← Início</button></div>
+  <div class="card"><div class="section-title"><div><h2>🎥 Vídeos e links importantes</h2><p class="muted">Guarde links da quadra, vídeos gravados e outros endereços úteis.</p></div></div>
+    <div class="grid"><div><label>Nome do link</label><input id="linkTitle" placeholder="Ex.: Vídeos das partidas"></div><div><label>Endereço</label><input id="linkUrl" type="url" placeholder="https://apertai.com.br/"></div></div>
+    <div style="margin-top:8px"><label>Descrição (opcional)</label><input id="linkDesc" placeholder="Ex.: Gravações das partidas na quadra"></div>
+    <button class="btn primary full" style="margin-top:9px" onclick="addImportantLink()">＋ Salvar link</button>
+  </div>
+  <div class="card"><div class="section-title"><h2>🔗 Links salvos</h2></div><div id="importantLinks"></div></div>
+</section>
+
 <section id="tournament" class="screen hidden">
   <div class="backhome"><button class="btn ghost" onclick="show('home')">← Início</button></div>
   <div class="card"><div class="section-title"><h2>🏆 Criar torneio</h2></div>
@@ -243,7 +259,7 @@ function safeJSON(v,fallback=null){
 
 // Variáveis de sincronização declaradas antes de qualquer função que possa ser executada.
 var cloudApplying=false, cloudPlayerCache=new Map(), cloudDirtyPlayers=new Set();
-const PKEY='cnr_players_final', HKEY='cnr_hist', TKEY='cnr_tournaments', AKEY='cnr_match_albums';
+const PKEY='cnr_players_final', HKEY='cnr_hist', TKEY='cnr_tournaments', AKEY='cnr_match_albums', GKEY='cnr_general_gallery', LKEY='cnr_important_links';
 const PHOTO_BUCKET='player-photos';
 let players=(()=>{const v=safeJSON(localStorage.getItem(PKEY)||'[]',[]);return Array.isArray(v)?v:[]})();
 let selectedPhoto='', A=0,B=0,sets=[];
@@ -253,6 +269,8 @@ let tournaments=(()=>{const v=safeJSON(localStorage.getItem(TKEY)||'[]',[]);retu
 const STAT_DEFS=[['attack','Ataque'],['defense','Defesa'],['block','Bloqueio'],['ace','Ace'],['perfectPass','Passe perfeito'],['serveWinner','Saque vencedor'],['assist','Levantamento decisivo']];
 let matchStats=safeJSON(localStorage.getItem('cnr_match_stats')||'{}',{});
 let matchAlbums=safeJSON(localStorage.getItem(AKEY)||'{}',{});if(!matchAlbums||typeof matchAlbums!=='object'||Array.isArray(matchAlbums))matchAlbums={};
+let generalGallery=safeJSON(localStorage.getItem(GKEY)||'[]',[]);if(!Array.isArray(generalGallery))generalGallery=[];
+let importantLinks=safeJSON(localStorage.getItem(LKEY)||'[]',[]);if(!Array.isArray(importantLinks))importantLinks=[];
 let playerRankMode='total';
 
 function save(){localStorage.setItem(PKEY,JSON.stringify(players));if(!cloudApplying){const now=new Map((Array.isArray(players)?players:[]).map(p=>[String(p.id),p]));for(const [id,p] of now){if(JSON.stringify(cloudPlayerCache.get(id))!==JSON.stringify(p))cloudDirtyPlayers.add(id)}for(const id of cloudPlayerCache.keys()){if(!now.has(id))cloudDirtyPlayers.add(id)}}}
@@ -341,17 +359,27 @@ function saveTournament(){localStorage.setItem(TKEY,JSON.stringify(tournaments))
 function recordTournamentWinner(tid,mid,winner){const t=tournaments.find(x=>x.id===tid);if(!t)return;const m=t.matches.find(x=>x.id===mid);if(!m||!winner)return;const previous=m.winner;if(previous){const old=t.teams.find(x=>x.id===previous);if(old)old.wins=Math.max(0,old.wins-1)}if(previous===winner){m.winner=null}else{m.winner=winner;const w=t.teams.find(x=>x.id===winner);if(w)w.wins++}t.teams.forEach(x=>x.losses=0);t.matches.forEach(x=>{if(x.winner&&x.b){const l=t.teams.find(q=>q.id===(x.winner===x.a?x.b:x.a));if(l)l.losses++}});saveTournament();renderTournament();toast('Resultado do torneio atualizado')}
 function renderTournament(){const tv=document.getElementById('tournamentView');if(!tv)return;const t=tournaments[0];if(!t){tv.innerHTML='<div class="muted">Nenhum torneio criado ainda. Crie um usando os times sorteados.</div>';if(document.getElementById('tourDate'))tourDate.value=localISO();return}const teamMap=Object.fromEntries(t.teams.map(x=>[x.id,x]));const photoForTeam=id=>{const ct=currentTeams.find(q=>q.id===id);const pp=ct?.players?.map(pid=>players.find(q=>String(q.id)===String(pid))).find(Boolean);return pp?.photo||''};const standings=[...t.teams].sort((a,b)=>b.wins-a.wins||a.name.localeCompare(b.name,'pt-BR'));const rows=standings.map((x,i)=>`<tr><td>${i+1}</td><td><span class="photo-name">${photoForTeam(x.id)?`<img class="rank-avatar" src="${photoForTeam(x.id)}">`:''}${esc(x.name)}</span></td><td>${x.wins}</td><td>${x.losses}</td></tr>`).join('');const matches=t.matches.map(m=>{const a=teamMap[m.a]?.name||'Equipe';const b=m.b?teamMap[m.b]?.name||'Equipe':'Folga';return `<div class="tmatch"><select onchange="recordTournamentWinner(${t.id},'${m.id}',this.value)"><option value="">${m.winner?'Resultado registrado':'Escolher vencedor'}</option><option value="${m.a}" ${m.winner===m.a?'selected':''}>${esc(a)}</option>${m.b?`<option value="${m.b}" ${m.winner===m.b?'selected':''}>${esc(b)}</option>`:'<option value="'+m.a+'">'+esc(a)+' (folga)</option>'}</select><span>×</span><div>${esc(a)} ${m.b?'× '+esc(b):'— folga'}</div><span class="done">${m.winner?'✓':''}</span></div>`}).join('');tv.innerHTML=`<div class="section-title"><div><b>${esc(t.name)}</b><div class="muted">${fmtDate(t.date)} • ${t.format==='roundrobin'?'Todos contra todos':'Mata-mata'}</div></div></div><h3 style="font-size:12px">Classificação</h3><table class="rank-table"><thead><tr><th>#</th><th>Equipe</th><th>V</th><th>D</th></tr></thead><tbody>${rows}</tbody></table><h3 style="font-size:12px;margin-top:14px">Partidas</h3>${matches}`;tourDate.value=t.date}
 
+async function uploadGeneralPhoto(file){if(!file)return;await ensureCloudAuth();const prepared=await preparePlayerPhoto(file);const blob=await (await fetch(prepared)).blob();const path=`general/${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;const {error}=await cloudClient.storage.from(PHOTO_BUCKET).upload(path,blob,{contentType:'image/jpeg',upsert:false,cacheControl:'31536000'});if(error)throw error;const {data}=cloudClient.storage.from(PHOTO_BUCKET).getPublicUrl(path);generalGallery.unshift({id:'g_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),url:data.publicUrl,path,createdAt:new Date().toISOString()});localStorage.setItem(GKEY,JSON.stringify(generalGallery));renderGeneralGallery();toast('Foto adicionada à galeria')}
+function renderGeneralGallery(){const box=document.getElementById('generalGallery');if(!box)return;box.innerHTML=generalGallery.length?generalGallery.map((x,i)=>`<div style="position:relative"><img src="${esc(x.url)}" alt="Foto geral ${i+1}" loading="lazy" onclick="openGalleryImage('${esc(x.url)}')"><button class="btn danger smallbtn" style="position:absolute;right:4px;top:4px" onclick="event.stopPropagation();deleteGeneralPhoto(${i})">×</button></div>`).join(''):'<div class="album-empty">📷 Nenhuma foto geral adicionada ainda.</div>'}
+async function deleteGeneralPhoto(i){const item=generalGallery[i];if(!item)return;if(!confirm('Excluir esta foto da galeria?'))return;try{if(item.path&&cloudClient){await ensureCloudAuth();const {error}=await cloudClient.storage.from(PHOTO_BUCKET).remove([item.path]);if(error)throw error}generalGallery.splice(i,1);localStorage.setItem(GKEY,JSON.stringify(generalGallery));renderGeneralGallery();toast('Foto excluída')}catch(e){console.error(e);toast('Não foi possível excluir a foto')}}
+function openGalleryImage(url){const m=document.getElementById('galleryModal'),img=document.getElementById('galleryModalImg');if(!m||!img)return;img.src=url;m.style.display='flex'}
+function closeGalleryImage(){const m=document.getElementById('galleryModal');if(m)m.style.display='none'}
+function normalizeUrl(v){v=String(v||'').trim();if(!v)return '';if(!/^https?:\/\//i.test(v))v='https://'+v;try{const u=new URL(v);return /^https?:$/.test(u.protocol)?u.href:''}catch(e){return ''}}
+function addImportantLink(){const title=(document.getElementById('linkTitle')?.value||'').trim();const url=normalizeUrl(document.getElementById('linkUrl')?.value||'');const desc=(document.getElementById('linkDesc')?.value||'').trim();if(!title||!url){toast('Informe o nome e o endereço do link');return}importantLinks.unshift({id:'l_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),title,url,desc,createdAt:new Date().toISOString()});localStorage.setItem(LKEY,JSON.stringify(importantLinks));document.getElementById('linkTitle').value='';document.getElementById('linkUrl').value='';document.getElementById('linkDesc').value='';renderImportantLinks();toast('Link salvo')}
+function deleteImportantLink(i){if(!confirm('Excluir este link?'))return;importantLinks.splice(i,1);localStorage.setItem(LKEY,JSON.stringify(importantLinks));renderImportantLinks();toast('Link excluído')}
+function renderImportantLinks(){const box=document.getElementById('importantLinks');if(!box)return;box.innerHTML=importantLinks.length?importantLinks.map((x,i)=>`<div class="link-card"><div class="link-meta"><b>${esc(x.title)}</b>${x.desc?`<div class="muted">${esc(x.desc)}</div>`:''}<div class="muted" style="font-size:11px;margin-top:3px">${esc(x.url)}</div></div><div class="link-actions"><a class="btn primary smallbtn" href="${esc(x.url)}" target="_blank" rel="noopener">Abrir</a><button class="btn danger smallbtn" onclick="deleteImportantLink(${i})">×</button></div></div>`).join(''):'<div class="muted">Nenhum link salvo ainda.</div>'}
+
 function toast(s){let t=document.getElementById('toast');t.textContent=s;t.style.display='block';setTimeout(()=>t.style.display='none',1800)}
 
 // Compatibilidade com histórico antigo: registros antigos continuam visíveis.
-renderPlayers();renderPresence();setsEl();renderTeams();populateMatchTeams();renderHistory();renderTournament();
+renderPlayers();renderPresence();setsEl();renderTeams();populateMatchTeams();renderHistory();renderTournament();renderGeneralGallery();renderImportantLinks();
 if(document.getElementById('matchDate'))document.getElementById('matchDate').value=matchMeta?.date||localISO();
 if(document.getElementById('tourDate'))document.getElementById('tourDate').value=tournaments[0]?.date||localISO();
 
 </script>
 <script>
 /* ===== CERVEJA NA REDE V23 — GRUPO ONLINE FIXO ===== */
-const FIXED_STATE_KEYS=['cnr_hist','cnr_tournaments','cnr_current_teams','cnr_match_meta','cnr_match_stats','cnr_match_albums'];
+const FIXED_STATE_KEYS=['cnr_hist','cnr_tournaments','cnr_current_teams','cnr_match_meta','cnr_match_stats','cnr_match_albums','cnr_general_gallery','cnr_important_links'];
 const DEFAULT_CLOUD_CONFIG={url:'https://sewbzgmpkindoftynkqp.supabase.co',key:'sb_publishable_PvY7Ctn-qr2Pu6kWLd5hww_EQH7USYU'};
 let cloudClient=null, cloudGroupId='', cloudGroupCode='CRN-1556', cloudPlayersChannel=null, cloudStateChannel=null;
 let cloudBusy=false, cloudAuthPromise=null, cloudStateTimers={};
@@ -570,6 +598,7 @@ localStorage.setItem=function(k,v){_v16SetItem(k,v);if(!cloudApplying){if(k===PK
 localStorage.removeItem=function(k){_v16RemoveItem(k);if(!cloudApplying){if(k===PKEY)schedulePlayersSync();else if(FIXED_STATE_KEYS.includes(k))scheduleFixedState(k)}};
 
 document.getElementById('matchPhotos')?.addEventListener('change',handleMatchPhotos);
+document.getElementById('generalPhotos')?.addEventListener('change',async e=>{const files=[...(e.target.files||[])];for(const f of files){try{await uploadGeneralPhoto(f)}catch(err){console.error(err);toast('Não foi possível salvar a foto na galeria')}}e.target.value='';});
 window.addEventListener('online',()=>{updateCloudUI();initCloud()});
 window.addEventListener('load',()=>setTimeout(initCloud,400));
 
