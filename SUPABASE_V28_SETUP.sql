@@ -1,4 +1,4 @@
--- CERVEJA NA REDE - V30
+-- CERVEJA NA REDE - V31
 -- Administração de fotos, estatísticas e troca de senha.
 -- Execute este arquivo no Supabase SQL Editor.
 -- Mantém os dados existentes.
