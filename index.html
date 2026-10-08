@@ -139,7 +139,7 @@ body.fullscreen-score main{max-width:none;width:100%;padding:0}
     <div class="home-menu">
       <button onclick="show('players')"><span>👥</span>Jogadores</button>
       <button onclick="document.getElementById('presence').scrollIntoView({behavior:'smooth'})"><span>👥</span>Participantes</button>
-      <button onclick="draw()"><span>⚽</span>Sorteio de Times</button>
+      <button onclick="show('home');setTimeout(()=>document.getElementById('nTeams').scrollIntoView({behavior:'smooth'}),50)"><span>⚽</span>Sorteio de Times</button>
       <button onclick="show('score')"><span>▣</span>Placar</button>
       <button onclick="show('history')"><span>◷</span>Histórico e Ranking</button>
       <button onclick="show('tournament')"><span>🏆</span>Torneio</button>
