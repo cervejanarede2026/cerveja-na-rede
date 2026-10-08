@@ -115,7 +115,7 @@ body.fullscreen-score main{max-width:none;width:100%;padding:0}
   <h3>✏️ Editar jogador</h3>
   <input type="hidden" id="editId">
   <div class="grid"><div><label>Nome / apelido</label><input id="editName"></div><div><label>Estrelas</label><select id="editRating"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div><div><label>Posição</label><select id="editPos"><option>Coringa</option><option>Levantador</option><option>Ponteiro</option><option>Oposto</option><option>Central</option><option>Líbero</option></select></div></div>
-  <div class="editphoto"><div id="editAvatar"></div><div style="flex:1"><label>Alterar foto</label><input id="editPhoto" type="file" accept="image/*"></div></div>
+  <div class="editphoto"><div id="editAvatar"></div><div style="flex:1"><label>Alterar foto</label><div class="gallery-actions"><label class="btn ghost smallbtn" style="cursor:pointer">📷 Tirar foto<input id="editPhotoCamera" type="file" accept="image/*" capture="environment" style="display:none"></label><label class="btn ghost smallbtn" style="cursor:pointer">🖼️ Galeria<input id="editPhoto" type="file" accept="image/*" style="display:none"></label></div></div></div>
   <div class="editor-actions"><button class="btn primary" onclick="savePlayerEdit()">Salvar alterações</button><button class="btn ghost" onclick="closeEditor()">Cancelar</button></div>
 </div></div>
 
@@ -169,7 +169,7 @@ body.fullscreen-score main{max-width:none;width:100%;padding:0}
   </div>
   <div class="card">
     <div class="section-title"><h2>Novo jogador</h2><span class="muted">1 a 5 estrelas</span></div>
-    <div class="grid"><div><label>Nome / apelido</label><input id="name" placeholder="Ex.: João"></div><div><label>Estrelas</label><select id="rating"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option></select></div><div><label>Posição</label><select id="pos"><option>Coringa</option><option>Levantador</option><option>Ponteiro</option><option>Oposto</option><option>Central</option><option>Líbero</option></select></div><div><label>Foto</label><input id="photo" type="file" accept="image/*"></div></div>
+    <div class="grid"><div><label>Nome / apelido</label><input id="name" placeholder="Ex.: João"></div><div><label>Estrelas</label><select id="rating"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option></select></div><div><label>Posição</label><select id="pos"><option>Coringa</option><option>Levantador</option><option>Ponteiro</option><option>Oposto</option><option>Central</option><option>Líbero</option></select></div><div><label>Foto</label><div class="gallery-actions"><label class="btn ghost smallbtn" style="cursor:pointer">📷 Câmera<input id="photoCamera" type="file" accept="image/*" capture="environment" style="display:none"></label><label class="btn ghost smallbtn" style="cursor:pointer">🖼️ Galeria<input id="photo" type="file" accept="image/*" style="display:none"></label></div></div></div>
     <div style="margin-top:9px"><button class="btn primary full" onclick="addPlayer()">Adicionar jogador</button></div>
     <button class="btn danger full" style="margin-top:7px" onclick="clearPlayers()">Apagar todos</button>
   </div>
@@ -184,7 +184,7 @@ body.fullscreen-score main{max-width:none;width:100%;padding:0}
     <div class="scorebox red"><div id="bTeamName">TIME B</div><div class="score" id="bScore">0</div><div class="scorebuttons"><button onclick="point('b',-1)">−1</button><button onclick="point('b',1)">+1</button></div></div>
   </div><div style="margin-top:9px"><button class="btn primary full" onclick="finishSet()">Finalizar Set</button></div></div>
   <div class="card"><div class="section-title"><h2>Sets</h2><div style="display:flex;gap:5px"><button class="btn ghost" onclick="toggleScoreFullscreen()">⛶ Tela inteira</button><button class="btn ghost" onclick="newGame()">Novo jogo</button></div></div><div id="sets" class="setlist"><div class="muted">Nenhum set finalizado.</div></div><button class="btn primary full" style="margin-top:10px" onclick="finishGame()">✅ Finalizar partida e salvar</button></div>
-  <div class="card"><div class="section-title"><div><h2>📸 Álbum da partida</h2><p class="muted">As fotos ficam vinculadas somente a esta partida.</p></div><label class="btn ghost" style="cursor:pointer">＋ Adicionar fotos<input id="matchPhotos" type="file" accept="image/*" multiple style="display:none"></label></div><div id="currentAlbum" class="album-grid"></div></div>
+  <div class="card"><div class="section-title"><div><h2>📸 Álbum da partida</h2><p class="muted">As fotos ficam vinculadas somente a esta partida.</p></div><div class="gallery-actions"><label class="btn primary" style="cursor:pointer">📷 Tirar foto<input id="matchCamera" type="file" accept="image/*" capture="environment" style="display:none"></label><label class="btn ghost" style="cursor:pointer">🖼️ Galeria<input id="matchPhotos" type="file" accept="image/*" multiple style="display:none"></label></div></div><div id="currentAlbum" class="album-grid"></div></div>
   <div class="card"><div class="section-title"><div><h2>📈 Estatísticas da partida</h2><p class="muted">Toque em + a cada ação realizada. Use − para corrigir.</p></div><button class="btn ghost smallbtn" onclick="resetMatchStats()">Zerar</button></div><div id="matchStatsView"></div></div>
 </section>
 
@@ -214,7 +214,7 @@ body.fullscreen-score main{max-width:none;width:100%;padding:0}
 
 <section id="gallery" class="screen hidden">
   <div class="backhome"><button class="btn ghost" onclick="show('home')">← Início</button></div>
-  <div class="card"><div class="section-title"><div><h2>📸 Galeria geral</h2><p class="muted">Fotos que não pertencem a uma partida específica.</p></div><label class="btn primary" style="cursor:pointer">＋ Adicionar fotos<input id="generalPhotos" type="file" accept="image/*" multiple style="display:none"></label></div><div id="generalGallery" class="album-grid general-gallery"></div></div>
+  <div class="card"><div class="section-title"><div><h2>📸 Galeria geral</h2><p class="muted">Fotos que não pertencem a uma partida específica.</p></div><div class="gallery-actions"><label class="btn primary" style="cursor:pointer">📷 Tirar foto<input id="generalCamera" type="file" accept="image/*" capture="environment" style="display:none"></label><label class="btn ghost" style="cursor:pointer">🖼️ Galeria<input id="generalPhotos" type="file" accept="image/*" multiple style="display:none"></label></div></div><div id="generalGallery" class="album-grid general-gallery"></div></div>
 </section>
 
 <section id="links" class="screen hidden">
@@ -310,7 +310,7 @@ async function preparePlayerPhoto(file){
 
 async function addPlayer(){let n=document.getElementById('name').value.trim();if(!n){toast('Digite o nome do jogador');return}try{const id=Date.now()+Math.random();let photoUrl=selectedPhoto;if(selectedPhotoFile){photoUrl=cloudClient&&cloudGroupId?await uploadPlayerPhoto(selectedPhotoFile,id):await preparePlayerPhoto(selectedPhotoFile)}players.push({id,name:n,rating:+rating.value,pos:pos.value,photo:photoUrl,present:true});save();name.value='';photo.value='';selectedPhoto='';selectedPhotoFile=null;renderPlayers();renderPresence();toast('Jogador adicionado!')}catch(e){console.error(e);toast('Não foi possível salvar a foto. Verifique a conexão e tente novamente.')}}
 let selectedPhotoFile=null;
-photo.onchange=e=>{selectedPhotoFile=e.target.files[0]||null;if(selectedPhotoFile){preparePlayerPhoto(selectedPhotoFile).then(v=>selectedPhoto=v).catch(()=>selectedPhoto='')}}
+const handlePlayerPhotoFile=e=>{selectedPhotoFile=e.target.files[0]||null;if(selectedPhotoFile){preparePlayerPhoto(selectedPhotoFile).then(v=>selectedPhoto=v).catch(()=>selectedPhoto='')}e.target.value=''}; photo.onchange=handlePlayerPhotoFile; document.getElementById('photoCamera')?.addEventListener('change',handlePlayerPhotoFile)
 function removePlayer(i){players.splice(i,1);save();renderPlayers();renderPresence()}
 function clearPlayers(){if(confirm('Apagar todos os jogadores?')){players=[];save();renderPlayers();renderPresence()}}
 function sortPlayersAZ(){players.sort((a,b)=>a.name.localeCompare(b.name,'pt-BR',{sensitivity:'base'}));save();renderPlayers();renderPresence();toast('Jogadores em ordem alfabética')}
@@ -331,7 +331,7 @@ let editingIndex=-1,editingPhoto='';
 function editPlayer(i){const p=players[i];if(!p)return;editingIndex=i;editingPhoto=p.photo||'';editId.value=p.id;editName.value=p.name;editRating.value=p.rating;editPos.value=p.pos||'Coringa';editAvatar.innerHTML=p.photo?`<img class="avatar" src="${p.photo}">`:`<div class="avatar">${esc((p.name||'?')[0])}</div>`;editPhoto.value='';editorOverlay.classList.add('show')}
 function closeEditor(){editorOverlay.classList.remove('show');editingIndex=-1;editingPhoto='';editingPhotoFile=null}
 let editingPhotoFile=null;
-editPhoto.onchange=async e=>{const f=e.target.files[0];if(!f)return;editingPhotoFile=f;try{const preview=await preparePlayerPhoto(f);editAvatar.innerHTML=`<img class="avatar" src="${preview}">`}catch(err){toast('Não foi possível preparar a foto. Tente outra imagem.')}};
+const handleEditPhoto=async e=>{const f=e.target.files[0];if(!f)return;editingPhotoFile=f;try{const preview=await preparePlayerPhoto(f);editAvatar.innerHTML=`<img class="avatar" src="${preview}">`}catch(err){toast('Não foi possível preparar a foto. Tente outra imagem.')}e.target.value=''}; editPhoto.onchange=handleEditPhoto; document.getElementById('editPhotoCamera')?.addEventListener('change',handleEditPhoto);
 async function savePlayerEdit(){if(editingIndex<0)return;const n=editName.value.trim();if(!n){toast('Digite o nome do jogador');return}try{const p=players[editingIndex];p.name=n;p.rating=+editRating.value;p.pos=editPos.value;if(editingPhotoFile){p.photo=cloudClient&&cloudGroupId?await uploadPlayerPhoto(editingPhotoFile,p.id):await preparePlayerPhoto(editingPhotoFile)}save();renderPlayers();renderPresence();closeEditor();editingPhotoFile=null;toast('Jogador atualizado!')}catch(e){console.error(e);toast('Não foi possível salvar a foto. Verifique a conexão.')}}
 
 async function toggleScoreFullscreen(){const score=document.getElementById('score');if(!document.fullscreenElement){try{await score.requestFullscreen()}catch(e){}document.body.classList.add('fullscreen-score');score.classList.add('fullscreen-mode')}else{try{await document.exitFullscreen()}catch(e){}document.body.classList.remove('fullscreen-score');score.classList.remove('fullscreen-mode')}}
@@ -597,8 +597,8 @@ const _v16SetItem=localStorage.setItem.bind(localStorage),_v16RemoveItem=localSt
 localStorage.setItem=function(k,v){_v16SetItem(k,v);if(!cloudApplying){if(k===PKEY)schedulePlayersSync();else if(FIXED_STATE_KEYS.includes(k))scheduleFixedState(k)}};
 localStorage.removeItem=function(k){_v16RemoveItem(k);if(!cloudApplying){if(k===PKEY)schedulePlayersSync();else if(FIXED_STATE_KEYS.includes(k))scheduleFixedState(k)}};
 
-document.getElementById('matchPhotos')?.addEventListener('change',handleMatchPhotos);
-document.getElementById('generalPhotos')?.addEventListener('change',async e=>{const files=[...(e.target.files||[])];for(const f of files){try{await uploadGeneralPhoto(f)}catch(err){console.error(err);toast('Não foi possível salvar a foto na galeria')}}e.target.value='';});
+document.getElementById('matchPhotos')?.addEventListener('change',handleMatchPhotos); document.getElementById('matchCamera')?.addEventListener('change',handleMatchPhotos);
+const handleGeneralPhotos=async e=>{const files=[...(e.target.files||[])];for(const f of files){try{await uploadGeneralPhoto(f)}catch(err){console.error(err);toast('Não foi possível salvar a foto na galeria')}}e.target.value='';}; document.getElementById('generalPhotos')?.addEventListener('change',handleGeneralPhotos); document.getElementById('generalCamera')?.addEventListener('change',handleGeneralPhotos);
 window.addEventListener('online',()=>{updateCloudUI();initCloud()});
 window.addEventListener('load',()=>setTimeout(initCloud,400));
 
