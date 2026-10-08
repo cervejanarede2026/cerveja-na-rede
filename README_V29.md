@@ -1,4 +1,4 @@
-CERVEJA NA REDE — V29
+CERVEJA NA REDE — V30
 
 Correções desta versão:
 - Controle de administrador também aparece dentro da Galeria de Fotos.
@@ -11,3 +11,6 @@ Correções desta versão:
 IMPORTANTE:
 - Execute SUPABASE_V28_SETUP.sql no Supabase se ainda não tiver executado o SQL de administração.
 - A senha inicial prevista pelo pacote é a definida no SQL. Depois, use a área de Administração para alterá-la.
+
+
+V30: a galeria permite abrir uma única foto em tela ampliada e, somente após autenticação do administrador, excluir exatamente aquela foto. O SQL também pode ser executado novamente sem erro de policy já existente. Fotos antigas sem `path` são removidas da galeria; fotos com `path` também são removidas do Storage.

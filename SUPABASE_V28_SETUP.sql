@@ -1,4 +1,4 @@
--- CERVEJA NA REDE - V28
+-- CERVEJA NA REDE - V30
 -- Administração de fotos, estatísticas e troca de senha.
 -- Execute este arquivo no Supabase SQL Editor.
 -- Mantém os dados existentes.
@@ -77,6 +77,8 @@ revoke all on function public.is_admin_session() from public, anon;
 grant execute on function public.is_admin_session() to authenticated;
 
 -- Somente administrador pode apagar objetos do bucket.
+-- Pode executar este arquivo novamente sem erro de policy já existente.
+drop policy if exists "CNR player photos delete admin only" on storage.objects;
 create policy "CNR player photos delete admin only"
 on storage.objects for delete to authenticated
 using (
