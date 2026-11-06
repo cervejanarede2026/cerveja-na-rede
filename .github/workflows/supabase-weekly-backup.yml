@@ -40,7 +40,7 @@ jobs:
 
             while true; do
               end=$((offset + 999))
-              curl --fail --silent --show-error --get \
+              curl --location --fail --silent --show-error --max-redirs 3 --get \
                 "${SUPABASE_URL%/}/rest/v1/$table" \
                 --data-urlencode "select=*" \
                 -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
