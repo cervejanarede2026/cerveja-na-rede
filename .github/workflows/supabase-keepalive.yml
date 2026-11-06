@@ -1,0 +1,25 @@
+
+name: Supabase Keep Alive
+
+on:
+  schedule:
+    - cron: '0 9,21 * * *'
+  workflow_dispatch:
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check Supabase activity
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          curl --fail --silent --show-error \
+            "${SUPABASE_URL%/}/rest/v1/fixed_state?select=*&limit=1" \
+            -H "apikey: ${SUPABASE_SERVICE_ROLE_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}"
+
+      - name: Confirm execution
+        run: echo "Supabase keep-alive completed successfully."
