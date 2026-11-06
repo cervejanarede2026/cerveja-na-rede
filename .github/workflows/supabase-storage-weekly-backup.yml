@@ -1,0 +1,146 @@
+
+name: Supabase Storage Weekly Backup
+
+on:
+  schedule:
+    - cron: '0 9 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Export Supabase Storage files
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${SUPABASE_URL:-}" || -z "${SUPABASE_SERVICE_ROLE_KEY:-}" ]]; then
+            echo "Supabase secrets are missing."
+            exit 1
+          fi
+
+          WORKDIR="$RUNNER_TEMP/storage-backup"
+          mkdir -p "$WORKDIR"
+          BUCKET="player-photos"
+
+          FILE_COUNT=0
+          TOTAL_BYTES=0
+
+          export_files() {
+            local prefix="$1"
+            local offset=0
+            local response
+            response="$(mktemp)"
+
+            while true; do
+              body="$(jq -n \
+                --arg prefix "$prefix" \
+                --argjson offset "$offset" \
+                '{prefix:$prefix, limit:1000, offset:$offset, sortBy:{column:"name",order:"asc"}}')"
+
+              curl --location --fail --silent --show-error \
+                -X POST \
+                "${SUPABASE_URL%/}/storage/v1/object/list/$BUCKET" \
+                -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+                -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+                -H "Content-Type: application/json" \
+                -d "$body" \
+                -o "$response"
+
+              if ! jq -e 'type == "array"' "$response" >/dev/null; then
+                echo "Unexpected Storage response for folder: $prefix"
+                head -c 1000 "$response"
+                echo
+                rm -f "$response"
+                exit 1
+              fi
+
+              count="$(jq 'length' "$response")"
+
+              while IFS= read -r item; do
+                name="$(jq -r '.name' <<< "$item")"
+                object_id="$(jq -r '.id // empty' <<< "$item")"
+                object_path="${prefix:+$prefix/}$name"
+
+                if [[ -z "$object_id" ]]; then
+                  echo "Entering folder: $object_path"
+                  export_files "$object_path"
+                else
+                  echo "Downloading: $object_path"
+
+                  encoded_path="$(python3 -c \
+                    'import sys,urllib.parse; print(urllib.parse.quote(sys.argv[1], safe="/"))' \
+                    "$object_path")"
+
+                  destination="$WORKDIR/$object_path"
+                  mkdir -p "$(dirname "$destination")"
+
+                  curl --location --fail --silent --show-error \
+                    "${SUPABASE_URL%/}/storage/v1/object/$BUCKET/$encoded_path" \
+                    -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+                    -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+                    -o "$destination"
+
+                  size="$(stat -c%s "$destination")"
+                  FILE_COUNT=$((FILE_COUNT + 1))
+                  TOTAL_BYTES=$((TOTAL_BYTES + size))
+                fi
+              done < <(jq -c '.[]' "$response")
+
+              if (( count < 1000 )); then
+                break
+              fi
+
+              offset=$((offset + 1000))
+            done
+
+            rm -f "$response"
+          }
+
+          export_files ""
+
+          echo "Total files downloaded: $FILE_COUNT"
+          echo "Total bytes downloaded: $TOTAL_BYTES"
+
+          if (( FILE_COUNT == 0 )); then
+            echo "No files were found. Backup will not be uploaded."
+            exit 1
+          fi
+
+          tar -czf "$RUNNER_TEMP/supabase-storage-backup.tar.gz" \
+            -C "$WORKDIR" .
+
+      - name: Encrypt Storage backup
+        env:
+          BACKUP_ENCRYPTION_KEY: ${{ secrets.BACKUP_ENCRYPTION_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${BACKUP_ENCRYPTION_KEY:-}" ]]; then
+            echo "Backup encryption secret is missing."
+            exit 1
+          fi
+
+          openssl enc -aes-256-cbc -e -salt -pbkdf2 \
+            -iter 200000 -md sha256 \
+            -pass env:BACKUP_ENCRYPTION_KEY \
+            -in "$RUNNER_TEMP/supabase-storage-backup.tar.gz" \
+            -out "$RUNNER_TEMP/supabase-storage-backup.tar.gz.enc"
+
+      - name: Upload encrypted Storage backup
+        uses: actions/upload-artifact@v4
+        with:
+          name: supabase-storage-backup-${{ github.run_id }}
+          path: ${{ runner.temp }}/supabase-storage-backup.tar.gz.enc
+          if-no-files-found: error
+          retention-days: 90
