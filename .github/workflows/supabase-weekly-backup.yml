@@ -50,8 +50,11 @@ jobs:
                 -o "$WORKDIR/page.json"
 
               if ! jq -e 'type == "array"' "$WORKDIR/page.json" >/dev/null; then
-                echo "Unexpected response while exporting $table."
-                exit 1
+              echo "Unexpected response while exporting $table."
+              echo "Response received (first 1000 characters):"
+              head -c 1000 "$WORKDIR/page.json"
+              echo
+              exit 1
               fi
 
               count="$(jq 'length' "$WORKDIR/page.json")"
